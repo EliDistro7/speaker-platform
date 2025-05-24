@@ -234,10 +234,11 @@ const Main = () => {
         />
       </motion.div>
 
-      {/* Profile Banner - only show on profile view */}
+      {/* Profile Banner - only show on profile view 
       {currentView === 'profile' && (
         <ProfileBanner speaker={speaker} language={language}/>
       )}
+        */}
 
       {/* Hero Section - only show on profile view */}
       {currentView === 'profile' && (
