@@ -1,20 +1,15 @@
-// context/LanguageContext.tsx
+// context/LanguageContext.js
 'use client'
 
 import { createContext, useContext, useState, useEffect } from 'react'
-import Cookies from 'js-cookie';
+import Cookies from 'js-cookie'
 
-type LanguageContextType = {
-  language: string
-  setLanguage: (lang: string) => void
-}
-
-const LanguageContext = createContext<LanguageContextType>({
+const LanguageContext = createContext({
   language: 'sw',
   setLanguage: () => {}
 })
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
+export function LanguageProvider({ children }) {
   const [language, setLanguage] = useState('sw')
 
   useEffect(() => {
@@ -23,7 +18,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     setLanguage(savedLang)
   }, [])
 
-  const updateLanguage = (lang: string) => {
+  const updateLanguage = (lang) => {
     Cookies.set('lang', lang, { expires: 365, path: '/' })
     setLanguage(lang)
   }
