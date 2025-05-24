@@ -163,6 +163,7 @@ const EnhancedBackground = () => {
 
 const Main = () => {
   const { language } = useLanguage();
+  console.log('Current language:', language);
   const t = translations[language];
   
   const [currentView, setCurrentView] = useState('profile');
