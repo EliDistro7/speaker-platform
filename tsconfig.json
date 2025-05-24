@@ -22,6 +22,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/page.js", "src/components/banners/ProfileBanner.js", "src/components/book/BookShop.js", "src/components/speaker/ContactInfo.js", "src/components/speaker/SpeakerAvatar.js", "src/components/speaker/SpeakerBio.js", "src/components/speaker/SpeakerHeader.js", "src/components/speaker/Specialties.js", "src/components/speaker/TestimonialCard.js", "src/components/speaker/TestimonialSection.js", "src/components/tickets/EmptyTicketState.js", "src/components/tickets/TicketCard.js", "src/components/tickets/QRCodeDisplay.js", "src/components/events/EventCard.js", "src/components/events/EventDetails.js", "src/components/layout/Navigation.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/page.js", "src/components/banners/ProfileBanner.js", "src/components/book/BookShop.js", "src/components/speaker/ContactInfo.js", "src/components/speaker/SpeakerAvatar.js", "src/components/speaker/SpeakerBio.js", "src/components/speaker/SpeakerHeader.js", "src/components/speaker/Specialties.js", "src/components/speaker/TestimonialCard.js", "src/components/speaker/TestimonialSection.js", "src/components/tickets/EmptyTicketState.js", "src/components/tickets/TicketCard.js", "src/components/tickets/QRCodeDisplay.js", "src/components/events/EventCard.js", "src/components/events/EventDetails.js", "src/components/layout/Navigation.js", "src/components/events/EventImage.js"],
   "exclude": ["node_modules"]
 }
