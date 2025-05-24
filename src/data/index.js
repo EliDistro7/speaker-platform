@@ -35,22 +35,73 @@
     ]
   };
 
-  export const events = [
-    {
-      id: 1,
-      title: language === 'en' 
-        ? "Leadership in the Digital Age"
-        : "Uongozi katika Enzi ya Kidijitali",
-      description: language === 'en'
-        ? "Discover how to lead effectively in our rapidly changing digital landscape."
-        : "Gundua jinsi ya kuongoza kwa ufanisi katika mazingira ya kidijitali yanayobadilika haraka.",
-      date: "2024-06-15",
-      time: "14:00",
-      duration: language === 'en' ? "2 hours" : "masaa 2",
-      location: language === 'en' ? "Convention Center, Downtown" : "Kituo cha Mikutano, Mjini",
-      price: 149,
-      capacity: 200,
-      registered: 127,
-      image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=250&fit=crop"
-    }
-  ];
+ export const events = [
+  {
+    id: 1,
+    title: language === 'en' 
+      ? "Leadership in the Digital Age"
+      : "Uongozi katika Enzi ya Kidijitali",
+    description: language === 'en'
+      ? "Discover how to lead effectively in our rapidly changing digital landscape."
+      : "Gundua jinsi ya kuongoza kwa ufanisi katika mazingira ya kidijitali yanayobadilika haraka.",
+    date: "2024-06-15",
+    time: "14:00",
+    duration: language === 'en' ? "2 hours" : "masaa 2",
+    location: language === 'en' ? "Convention Center, Downtown" : "Kituo cha Mikutano, Mjini",
+    price: 149,
+    capacity: 200,
+    registered: 127,
+    image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=250&fit=crop"
+  },
+  {
+    id: 2,
+    title: language === 'en' 
+      ? "Entrepreneurship & Innovation in East Africa"
+      : "Ujasiriamali na Uvumbuzi Afrika Mashariki",
+    description: language === 'en'
+      ? "Explore opportunities for business growth and innovation across Tanzania and the East African region. Connect with successful entrepreneurs and investors."
+      : "Chunguza fursa za ukuaji wa biashara na uvumbuzi kote Tanzania na eneo la Afrika Mashariki. Unganishwa na wajasiriamali na wawekezaji mafanikio.",
+    date: "2024-07-20",
+    time: "09:00",
+    duration: language === 'en' ? "4 hours" : "masaa 4",
+    location: language === 'en' ? "Dar es Salaam Business Hub" : "Kituo cha Biashara Dar es Salaam",
+    price: 75,
+    capacity: 150,
+    registered: 89,
+    image: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=400&h=250&fit=crop"
+  },
+  {
+    id: 3,
+    title: language === 'en' 
+      ? "Sustainable Agriculture & Climate Resilience"
+      : "Kilimo Endelevu na Muugunduzi wa Tabianchi",
+    description: language === 'en'
+      ? "Learn about modern farming techniques, climate adaptation strategies, and sustainable practices for Tanzanian agriculture. Features local experts and success stories."
+      : "Jifunze mbinu za kisasa za kilimo, mikakati ya kukabiliana na mabadiliko ya tabianchi, na mbinu endelevu za kilimo Tanzania. Ina wataalamu wa ndani na hadithi za mafanikio.",
+    date: "2024-08-10",
+    time: "08:30",
+    duration: language === 'en' ? "6 hours" : "masaa 6",
+    location: language === 'en' ? "Arusha Agricultural Training Center" : "Kituo cha Mafunzo ya Kilimo Arusha",
+    price: 45,
+    capacity: 300,
+    registered: 234,
+    image: "https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=400&h=250&fit=crop"
+  },
+  {
+    id: 4,
+    title: language === 'en' 
+      ? "Tourism & Cultural Heritage Development"
+      : "Utalii na Maendeleo ya Utamaduni",
+    description: language === 'en'
+      ? "Discover how to develop and promote Tanzania's rich cultural heritage and natural attractions. Network with tourism professionals and cultural leaders."
+      : "Gundua jinsi ya kuendeleza na kukuza utamaduni tajiri wa Tanzania na vivutio vya asili. Shirikiana na wataalamu wa utalii na viongozi wa kitamaduni.",
+    date: "2024-09-05",
+    time: "10:00",
+    duration: language === 'en' ? "3 hours" : "masaa 3",
+    location: language === 'en' ? "Stone Town Cultural Center, Zanzibar" : "Kituo cha Utamaduni Stone Town, Zanzibar",
+    price: 60,
+    capacity: 120,
+    registered: 67,
+    image: "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=400&h=250&fit=crop"
+  }
+];
