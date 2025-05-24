@@ -1,103 +1,501 @@
-import Image from "next/image";
+'use client';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { CheckCircle, Sparkles, Globe, Star } from 'lucide-react';
+import { useInView } from 'react-intersection-observer';
+import { useLanguage } from '@/contexts/language';
+import { Navigation } from '@/components/layout/Navigation';
+import { Card } from '@/components/ui/Card';
+import { SpeakerBio } from '@/components/speaker/SpeakerBio';
+import { ContactInfo } from '@/components/speaker/ContactInfo';
+import { SpecialtiesList } from '@/components/speaker/Specialties';
+import { SpeakerHeader } from '@/components/speaker/SpeakerHeader';
+import { TestimonialsSection } from '@/components/speaker/TestimonialSection';  
+import { EventsList } from '@/components/events/EventList';
+import { TicketsList } from '@/components/tickets/TicketList';
+import { BooksShop } from '@/components/book/BookShop';
+import { Modal } from '@/components/ui/Modal';
+import { EventDetails } from '@/components/events/EventDetails';
+import { PurchaseForm } from '@/components/forms/PurchaseForm';
+import { Button } from '@/components/ui/Button';
+import { QRCodeDisplay } from '@/components/tickets/QRCodeDisplay';
+import ProfileBanner from '@/components/banners/ProfileBanner';
 
-export default function Home() {
+const translations = {
+  en: {
+    registerForEvent: 'Register for Event',
+    cancel: 'Cancel',
+    purchaseTickets: 'Purchase Tickets',
+    purchaseCompleted: 'Purchase completed!',
+    downloadTicket: 'Download ticket',
+    profile: 'Profile',
+    events: 'Events',
+    tickets: 'My Tickets',
+    shop: 'Shop',
+    welcome: 'Welcome',
+    experienceExcellence: 'Experience Excellence',
+    transformYourJourney: 'Transform Your Journey',
+    businessCoach: 'Business & Life Coach',
+    internationalSpeaker: 'International Speaker',
+    entrepreneur: 'Entrepreneur',
+    totalSpeaks: 'Total Speaks',
+    rating: 'Rating',
+    loadingProfile: 'Loading profile...',
+    noEvents: 'No events available',
+    noTickets: 'No tickets purchased yet'
+  },
+  sw: {
+    registerForEvent: 'Jisajili kwa Tukio',
+    cancel: 'Ghairi',
+    purchaseTickets: 'Nunua Tiketi',
+    purchaseCompleted: 'Ununuzi umekamilika!',
+    downloadTicket: 'Pakua tiketi',
+    profile: 'Wasifu',
+    events: 'Matukio',
+    tickets: 'Tiketi Zangu',
+    shop: 'Duka',
+    welcome: 'Karibu',
+    experienceExcellence: 'Pata Ubora',
+    transformYourJourney: 'Badilisha Safari Yako',
+    businessCoach: 'Kocha wa Biashara na Maisha',
+    internationalSpeaker: 'Mzungumzaji wa Kimataifa',
+    entrepreneur: 'Mfanyabiashara',
+    totalSpeaks: 'Jumla ya Mazungumzo',
+    rating: 'Kiwango',
+    loadingProfile: 'Inapakia wasifu...',
+    noEvents: 'Hakuna matukio yaliyopatikana',
+    noTickets: 'Bado haujanunua tiketi yoyote'
+  }
+};
+
+// Floating particles animation component
+const FloatingParticles = () => {
+  const particles = Array.from({ length: 20 }, (_, i) => ({
+    id: i,
+    size: Math.random() * 4 + 2,
+    x: Math.random() * 100,
+    y: Math.random() * 100,
+    duration: Math.random() * 20 + 10
+  }));
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
+    <div className="fixed inset-0 pointer-events-none overflow-hidden">
+      {particles.map((particle) => (
+        <motion.div
+          key={particle.id}
+          className="absolute rounded-full bg-gradient-to-r from-blue-400/20 to-purple-400/20"
+          style={{
+            width: particle.size,
+            height: particle.size,
+            left: `${particle.x}%`,
+            top: `${particle.y}%`,
+          }}
+          animate={{
+            y: [0, -30, 0],
+            x: [0, 15, -15, 0],
+            opacity: [0.3, 0.8, 0.3],
+            scale: [1, 1.2, 1]
+          }}
+          transition={{
+            duration: particle.duration,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
         />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      ))}
     </div>
   );
-}
+};
+
+// Enhanced background with gradient mesh
+const EnhancedBackground = () => {
+  return (
+    <div className="fixed inset-0 -z-10">
+      {/* Base gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50/80 to-indigo-100/90" />
+      
+      {/* Animated gradient orbs */}
+      <motion.div
+        className="absolute top-0 -left-4 w-72 h-72 bg-gradient-to-r from-blue-400/30 to-purple-600/30 rounded-full mix-blend-multiply filter blur-xl"
+        animate={{
+          x: [0, 50, -50, 0],
+          y: [0, -30, 30, 0],
+          scale: [1, 1.1, 0.9, 1]
+        }}
+        transition={{
+          duration: 20,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
+      
+      <motion.div
+        className="absolute top-40 -right-4 w-72 h-72 bg-gradient-to-r from-cyan-400/30 to-blue-600/30 rounded-full mix-blend-multiply filter blur-xl"
+        animate={{
+          x: [0, -30, 30, 0],
+          y: [0, 50, -30, 0],
+          scale: [1, 0.8, 1.2, 1]
+        }}
+        transition={{
+          duration: 25,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
+      
+      <motion.div
+        className="absolute -bottom-8 left-20 w-72 h-72 bg-gradient-to-r from-indigo-400/20 to-purple-600/20 rounded-full mix-blend-multiply filter blur-xl"
+        animate={{
+          x: [0, 40, -20, 0],
+          y: [0, -20, 20, 0],
+          scale: [1, 1.3, 0.7, 1]
+        }}
+        transition={{
+          duration: 30,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
+    </div>
+  );
+};
+
+const Main = () => {
+  const { language } = useLanguage();
+  const t = translations[language];
+  
+  const [currentView, setCurrentView] = useState('profile');
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [tickets, setTickets] = useState([]);
+  const [cartCount, setCartCount] = useState(0); // Add cart count state
+  const [purchaseForm, setPurchaseForm] = useState({ 
+    name: '', 
+    email: '', 
+    phone: '', 
+    quantity: 1 
+  });
+
+  // Intersection observer for animations
+  const [heroRef, heroInView] = useInView({
+    threshold: 0.1,
+    triggerOnce: true
+  });
+
+  const [contentRef, contentInView] = useInView({
+    threshold: 0.1,
+    triggerOnce: true
+  });
+
+  // Mock data with bilingual support
+  const speaker = {
+    id: 1,
+    name: "Dr. James Mwangamba",
+    title: language === 'en' 
+      ? "Business & Life Coach, International Speaker & Entrepreneur"
+      : "Kocha wa Biashara na Maisha, Mzungumzaji wa Kimataifa na Mfanyabiashara",
+    bio: language === 'en'
+      ? "Dr. James Mwangamba is a renowned leadership consultant with over 15 years of experience helping Fortune 500 companies and individuals transform their organizational culture and personal growth journey."
+      : "Dkt. James Mwangamba ni mshauri mashuhuri wa uongozi aliye na uzoefu wa zaidi ya miaka 15 wa kusaidia makampuni makubwa na watu binafsi kubadilisha utamaduni wa shirika na safari ya ukuaji wa kibinafsi.",
+    image: "/avatar.jpg",
+    rating: 4.9,
+    totalSpeaks: 247,
+    email: "info@jamesmwangamba.com",
+    phone: "+1 (555) 123-4567",
+    website: "www.jamesmwangamba.com",
+    specialties: language === 'en' 
+      ? ["Leadership Development", "Innovation Management", "Team Building"]
+      : ["Maendeleo ya Uongozi", "Usimamizi wa Ubunifu", "Ujenzi wa Timu"],
+    testimonials: [
+      {
+        text: language === 'en'
+          ? "James's insights on leadership transformation were game-changing for our organization."
+          : "Maarifa ya James kuhusu mabadiliko ya uongozi yaligeuza kabisa shirika letu.",
+        author: language === 'en' ? "CEO, TechCorp" : "Mkurugenzi Mkuu, TechCorp"
+      },
+      {
+        text: language === 'en'
+          ? "One of the most engaging speakers I've ever heard. Practical and inspiring."
+          : "Mmoja wa wazungumzaji wenye kuvutia zaidi niliyewahi kusikia. Wa vitendo na wa kutia moyo.",
+        author: language === 'en' ? "HR Director, GlobalInc" : "Mkurugenzi wa Rasilimali Watu, GlobalInc"
+      }
+    ]
+  };
+
+  const events = [
+    {
+      id: 1,
+      title: language === 'en' 
+        ? "Leadership in the Digital Age"
+        : "Uongozi katika Enzi ya Kidijitali",
+      description: language === 'en'
+        ? "Discover how to lead effectively in our rapidly changing digital landscape."
+        : "Gundua jinsi ya kuongoza kwa ufanisi katika mazingira ya kidijitali yanayobadilika haraka.",
+      date: "2024-06-15",
+      time: "14:00",
+      duration: language === 'en' ? "2 hours" : "masaa 2",
+      location: language === 'en' ? "Convention Center, Downtown" : "Kituo cha Mikutano, Mjini",
+      price: 149,
+      capacity: 200,
+      registered: 127,
+      image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=250&fit=crop"
+    }
+  ];
+
+  const handlePurchase = () => {
+    const newTicket = {
+      id: Date.now(),
+      eventId: selectedEvent.id,
+      eventTitle: selectedEvent.title,
+      purchaseDate: new Date().toISOString(),
+      ...purchaseForm
+    };
+    
+    setTickets(prev => [...prev, newTicket]);
+    
+    // Show success message
+    alert(t.purchaseCompleted);
+    setSelectedEvent(null);
+    
+    // Reset form
+    setPurchaseForm({ name: '', email: '', phone: '', quantity: 1 });
+  };
+
+  // Function to handle cart updates from BooksShop
+  const handleCartUpdate = (newCartCount) => {
+    setCartCount(newCartCount);
+  };
+
+  return (
+    <div className="min-h-screen relative overflow-hidden">
+      <EnhancedBackground />
+      <FloatingParticles />
+      
+      {/* Navigation with enhanced styling and cart count */}
+      <motion.div
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+      >
+        <Navigation 
+          currentView={currentView}
+          onViewChange={setCurrentView}
+          speaker={speaker}
+          ticketCount={tickets.length}
+          cartCount={cartCount} // Pass cart count to navigation
+        />
+      </motion.div>
+
+      {/* Profile Banner - only show on profile view */}
+      {currentView === 'profile' && (
+        <ProfileBanner speaker={speaker} language={language}/>
+      )}
+
+      {/* Hero Section - only show on profile view */}
+      {currentView === 'profile' && (
+        <motion.div
+          ref={heroRef}
+          className="relative z-10 pt-20 pb-12"
+          initial={{ opacity: 0 }}
+          animate={heroInView ? { opacity: 1 } : { opacity: 0 }}
+          transition={{ duration: 1 }}
+        >
+          <div className="max-w-6xl mx-auto px-4 text-center">
+            <motion.div
+              initial={{ y: 50, opacity: 0 }}
+              animate={heroInView ? { y: 0, opacity: 1 } : { y: 50, opacity: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="inline-flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 border border-blue-200/50 mb-8"
+            >
+              <Sparkles className="w-5 h-5 text-blue-600" />
+              <span className="text-blue-700 font-semibold">{t.experienceExcellence}</span>
+            </motion.div>
+            
+            <motion.h1
+              initial={{ y: 50, opacity: 0 }}
+              animate={heroInView ? { y: 0, opacity: 1 } : { y: 50, opacity: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-6 leading-tight"
+            >
+              {t.welcome}
+            </motion.h1>
+            
+            <motion.p
+              initial={{ y: 50, opacity: 0 }}
+              animate={heroInView ? { y: 0, opacity: 1 } : { y: 50, opacity: 0 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+              className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed"
+            >
+              {t.transformYourJourney}
+            </motion.p>
+            
+            <motion.div
+              initial={{ y: 50, opacity: 0 }}
+              animate={heroInView ? { y: 0, opacity: 1 } : { y: 50, opacity: 0 }}
+              transition={{ duration: 0.8, delay: 0.8 }}
+              className="flex flex-wrap justify-center gap-4 text-sm text-gray-500"
+            >
+              <div className="flex items-center space-x-2 bg-white/60 backdrop-blur-sm rounded-full px-4 py-2">
+                <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                <span>{speaker.rating} {t.rating}</span>
+              </div>
+              <div className="flex items-center space-x-2 bg-white/60 backdrop-blur-sm rounded-full px-4 py-2">
+                <Globe className="w-4 h-4 text-blue-500" />
+                <span>{speaker.totalSpeaks} {t.totalSpeaks}</span>
+              </div>
+            </motion.div>
+          </div>
+        </motion.div>
+      )}
+      
+      {/* Main Content */}
+      <motion.div
+        ref={contentRef}
+        className={`relative z-10 ${currentView === 'profile' ? 'max-w-6xl mx-auto px-4 pb-16' : ''}`}
+        initial={{ opacity: 0, y: 50 }}
+        animate={contentInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+        transition={{ duration: 0.8 }}
+      >
+        <AnimatePresence mode="wait">
+          {currentView === 'profile' && (
+            <motion.div
+              key="profile"
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 50 }}
+              transition={{ duration: 0.5 }}
+              className="space-y-8"
+            >
+              <Card padding="p-0" className="overflow-hidden backdrop-blur-sm bg-white/90 border-white/20 shadow-2xl">
+                <SpeakerHeader speaker={speaker} />
+                <div className="p-8">
+                 {/* <SpeakerBio bio={speaker.bio} /> */}
+                  <div className="grid md:grid-cols-2 gap-8 mt-8">
+                    <ContactInfo speaker={speaker} />
+                    <SpecialtiesList specialties={speaker.specialties} />
+                  </div>
+                </div>
+              </Card>
+              <TestimonialsSection testimonials={speaker.testimonials} />
+            </motion.div>
+          )}
+          
+          {currentView === 'events' && (
+            <motion.div
+              key="events"
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 50 }}
+              transition={{ duration: 0.5 }}
+            >
+              <EventsList events={events} onRegister={setSelectedEvent} />
+            </motion.div>
+          )}
+          
+          {currentView === 'tickets' && (
+            <motion.div
+              key="tickets"
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 50 }}
+              transition={{ duration: 0.5 }}
+            >
+              <TicketsList 
+                tickets={tickets}
+                onDownload={(ticket) => alert(`${t.downloadTicket}: ${ticket.id}`)}
+                onBrowseEvents={() => setCurrentView('events')}
+              />
+            </motion.div>
+          )}
+
+          {currentView === 'shop' && (
+            <motion.div
+              key="shop"
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 50 }}
+              transition={{ duration: 0.5 }}
+              className="w-full"
+            >
+              <BooksShop 
+                speaker={speaker} 
+                onCartUpdate={handleCartUpdate}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+
+      {/* Enhanced Modal */}
+      <AnimatePresence>
+        {selectedEvent && (
+          <Modal
+            isOpen={!!selectedEvent}
+            onClose={() => setSelectedEvent(null)}
+            title={t.registerForEvent}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="mb-6">
+                <motion.h3 
+                  className="text-xl font-semibold mb-4 text-gray-800"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                >
+                  {selectedEvent?.title}
+                </motion.h3>
+                <EventDetails event={selectedEvent} />
+              </div>
+              
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <PurchaseForm 
+                  formData={purchaseForm}
+                  onChange={setPurchaseForm}
+                  event={selectedEvent}
+                />
+              </motion.div>
+              
+              <motion.div 
+                className="flex space-x-4 mt-6"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <Button 
+                  variant="outline" 
+                  onClick={() => setSelectedEvent(null)}
+                  className="flex-1 hover:scale-105 transition-transform duration-200"
+                >
+                  {t.cancel}
+                </Button>
+                <Button 
+                  onClick={handlePurchase}
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 hover:scale-105 transition-all duration-200"
+                >
+                  <motion.div
+                    className="flex items-center justify-center"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <CheckCircle className="w-5 h-5 mr-2" />
+                    {t.purchaseTickets}
+                  </motion.div>
+                </Button>
+              </motion.div>
+            </motion.div>
+          </Modal>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+export default Main;
