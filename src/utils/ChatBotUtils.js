@@ -280,6 +280,24 @@ export const processUserMessage = (message, chatData, language) => {
     };
   }
   
+  // Check for booking request FIRST
+  if (isBookingQuery(message, detectedLang)) {
+    console.log('Booking request detected');
+    return {
+      text: getBookingResponse(chatData, detectedLang),
+      suggestions: generateSuggestions(null, chatData, detectedLang)
+    };
+  }
+
+    // Check for pricing request
+  if (isPricingQuery(message, detectedLang)) {
+    console.log('Pricing request detected');
+    return {
+      text: getPricingResponse(message, chatData, detectedLang),
+      suggestions: generateSuggestions(null, chatData, detectedLang)
+    };
+  }
+  
   // Check for contact information request
   if (isAskingForContact(message, detectedLang)) {
     console.log('Contact request detected');
@@ -316,7 +334,6 @@ export const processUserMessage = (message, chatData, language) => {
     suggestions: chatData.prompts?.[detectedLang] || []
   };
 };
-
 
 
 
@@ -387,3 +404,177 @@ const handleMessageSend = () => {
 
 
 
+
+
+// Additional functions to add to your existing chatbotUtils.js
+
+/**
+ * Check if user is asking about booking/appointment
+ * @param {string} message - User message
+ * @param {string} language - Current language
+ * @returns {boolean} - True if asking about booking
+ */
+export const isBookingQuery = (message, language) => {
+  if (!message) return false;
+  
+  const lowerMsg = message.toLowerCase();
+  
+  const bookingKeywords = {
+    en: [
+      'book', 'booking',"time", 'appointment', 'schedule', 'reserve',
+      'how to book', 'book dr', 'doctor appointment', 'consultation',
+      'visit', 'see doctor', 'meet doctor', 'appointment with',
+      'dr. mwangamba', 'dr mwangamba', 'mwangamba'
+    ],
+    sw: [
+      'kureserv', 'miadi',"muda", 'kuweka miadi', 'kuonana na daktari',
+      'jinsi ya kuweka miadi', 'daktari', 'kumpata daktari',
+      'kumuona daktari', 'mahojiano', 'mwangamba'
+    ]
+  };
+  
+  const keywords = bookingKeywords[language] || bookingKeywords.en;
+  return keywords.some(keyword => lowerMsg.includes(keyword.toLowerCase()));
+};
+
+/**
+ * Get booking response
+ * @param {object} chatData - Chatbot data
+ * @param {string} language - Current language
+ * @returns {string} - Booking response
+ */
+export const getBookingResponse = (chatData, language) => {
+  // Check if booking info exists in chatData
+  if (chatData.booking && chatData.booking[language]) {
+    const bookingInfo = chatData.booking[language];
+    return `**${bookingInfo.title}**\n\n${bookingInfo.instructions}\n\n${bookingInfo.contactDetails}`;
+  }
+  
+  // Default booking response
+  const defaultBookingResponses = {
+    en: `**How to Book an Appointment with Dr. Mwangamba**\n\n` +
+         `To schedule an appointment, please:\n\n` +
+         `📞 **Call us:** +255 123 456 789\n` +
+         `📧 **Email:** appointments@drmwangamba.com\n` +
+         `🕒 **Office Hours:** Monday - Friday: 8:00 AM - 5:00 PM\n\n` +
+         `Our team will help you find the best available time slot that works for your schedule.`,
+    
+    sw: `**Jinsi ya Kuweka Miadi na Daktari Mwangamba**\n\n` +
+         `Kuweka miadi, tafadhali:\n\n` +
+         `📞 **Piga simu:** +255 123 456 789\n` +
+         `📧 **Barua pepe:** appointments@drmwangamba.com\n` +
+         `🕒 **Saa za Ofisi:** Jumatatu - Ijumaa: 8:00 AM - 5:00 PM\n\n` +
+         `Timu yetu itakusaidia kupata wakati unaofaa zaidi kwako.`
+  };
+  
+  return defaultBookingResponses[language] || defaultBookingResponses.en;
+};
+
+
+/**
+ * Check if user is asking about pricing
+ * @param {string} message - User message
+ * @param {string} language - Current language
+ * @returns {boolean} - True if asking about pricing
+ */
+export const isPricingQuery = (message, language) => {
+  if (!message) return false;
+  
+  const lowerMsg = message.toLowerCase();
+  
+  const pricingKeywords = {
+    en: [
+      'price', 'pricing', 'cost', 'fee', 'charge', 'rate', 'budget',
+      'how much', 'what does it cost', 'pricing for', 'cost of',
+      'rates for', 'fees for', 'charges for', 'price list',
+      'what are the prices', 'how much does', 'what is the cost'
+    ],
+    sw: [
+      'bei', 'gharama', 'kiasi', 'malipo', 'ada', 'kiwango',
+      'ni kiasi gani', 'gharama ya', 'bei ya', 'malipo ya',
+      'ni bei gani', 'inagharimu', 'unatozwa'
+    ]
+  };
+  
+  const keywords = pricingKeywords[language] || pricingKeywords.en;
+  return keywords.some(keyword => lowerMsg.includes(keyword.toLowerCase()));
+};
+
+/**
+ * Get pricing response for a specific service or general pricing
+ * @param {string} message - User message to detect specific service
+ * @param {object} chatData - Chatbot data
+ * @param {string} language - Current language
+ * @returns {string} - Pricing response
+ */
+export const getPricingResponse = (message, chatData, language) => {
+  // Try to find which service they're asking about
+  const serviceMatch = findMatchingService(message, chatData.serviceKeywords, language);
+  
+  if (serviceMatch && chatData.pricing && chatData.pricing[language] && chatData.pricing[language][serviceMatch]) {
+    const servicePricing = chatData.pricing[language][serviceMatch];
+    
+    let response = `**${serviceMatch} - Pricing Information**\n\n`;
+    
+    // Add packages
+    if (servicePricing.packages && servicePricing.packages.length > 0) {
+      servicePricing.packages.forEach((pkg, index) => {
+        const popularBadge = pkg.popular ? ' ⭐ **POPULAR**' : '';
+        response += `### ${pkg.name}${popularBadge}\n`;
+        response += `💰 **${servicePricing.currency} ${pkg.price.toLocaleString()}** ${pkg.billingCycle}\n\n`;
+        response += `${pkg.description}\n\n`;
+        
+        // Add key features (limit to 5 for brevity)
+        if (pkg.features && pkg.features.length > 0) {
+          response += `**Key Features:**\n`;
+          pkg.features.slice(0, 5).forEach(feature => {
+            response += `• ${feature}\n`;
+          });
+          if (pkg.features.length > 5) {
+            response += `• ...and ${pkg.features.length - 5} more features\n`;
+          }
+        }
+        
+        response += '\n---\n\n';
+      });
+    }
+    
+    // Add custom note if available
+    if (servicePricing.customNote) {
+      response += `**Important Note:** ${servicePricing.customNote}\n\n`;
+    }
+    
+    response += `For detailed quotes and customization, please contact us directly.`;
+    
+    return response;
+  }
+  
+  // General pricing response if no specific service found
+  const generalPricingResponse = {
+    en: `**Our Pricing Information**\n\n` +
+         `We offer competitive rates for all our services:\n\n` +
+         `• **Keynote Speaking**: Starting from $2,500\n` +
+         `• **Workshop Facilitation**: Starting from $3,500\n` +
+         `• **Consulting Services**: Custom quotes available\n\n` +
+         `Pricing varies based on:\n` +
+         `- Event duration and complexity\n` +
+         `- Audience size\n` +
+         `- Location and travel requirements\n` +
+         `- Customization level\n\n` +
+         `For detailed pricing information, please specify which service you're interested in or contact us directly.`,
+    
+    sw: `**Maelezo ya Bei Zetu**\n\n` +
+         `Tunauza kwa bei nafuu kwa huduma zote:\n\n` +
+         `• **Hotuba Kuu**: Kuanzia $2,500\n` +
+         `• **Uongozaji wa Warsha**: Kuanzia $3,500\n` +
+         `• **Huduma za Ushauri**: Bei maalum zinapatikana\n\n` +
+         `Bei inategemea:\n` +
+         `- Muda na ugumu wa tukio\n` +
+         `- Idadi ya wasikilizaji\n` +
+         `- Mahali na mahitaji ya safari\n` +
+         `- Kiwango cha ubinafsishaji\n\n` +
+         `Kwa maelezo kamili ya bei, tafadhali bainisha huduma unayohitaji au wasiliana nasi moja kwa moja.`
+  };
+  
+  return generalPricingResponse[language] || generalPricingResponse.en;
+};

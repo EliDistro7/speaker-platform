@@ -7,7 +7,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/language';
 import { chatbotData } from '@/data/chat/index';
 
-// Import all utility functions from chatBotUtils
+// Import enhanced service context utilities
+import {
+  detectServiceFromMessage,
+  updateServiceContext,
+  generateContextualPrompts,
+  generatePricingResponse,
+  isPricingInquiry,
+  getConversationInsights,
+  createFreshServiceContext,
+  validateServiceContext
+} from '@/utils/serviceContextUtils';
+
+// Import existing utility functions from chatBotUtils
 import {
   detectLanguage,
   processUserMessage,
@@ -30,13 +42,18 @@ import FloatingButton from './FloatingButton';
 import { chatContainerVariants } from './animations';
 
 export default function ChatBot() {
-  const { language, setLanguage } = useLanguage(); // Add setLanguage if you want to auto-switch
+  const pricingData = chatbotData.pricing;
+  const { language, setLanguage } = useLanguage();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
   const [activeService, setActiveService] = useState(null);
+  
+  // Enhanced service context using utility functions
+  const [serviceContext, setServiceContext] = useState(() => createFreshServiceContext());
+  
   const containerRef = useRef(null);
   const chatEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -48,6 +65,8 @@ export default function ChatBot() {
       { role: 'bot', content: chatbotData.welcome[language] }
     ]);
     setSuggestions(chatbotData.prompts[language]);
+    // Reset service context when language changes
+    setServiceContext(createFreshServiceContext());
   }, [language]);
 
   // Auto-scroll to the latest message
@@ -85,6 +104,7 @@ export default function ChatBot() {
     };
   }, [isChatOpen]);
 
+  // Enhanced message processing with advanced service context management
   const handleMessageSend = () => {
     if (!message.trim()) return;
     
@@ -93,12 +113,28 @@ export default function ChatBot() {
     // Use detectLanguage utility to detect language from user message
     const detectedLang = detectLanguage(userMessage, null, language);
     
-    // Add user message with detected language
+    // Use enhanced service detection from utilities
+    const serviceDetection = detectServiceFromMessage(userMessage, detectedLang);
+    const detectedService = serviceDetection.service;
+    
+    // Update service context using utility function
+    const updatedServiceContext = updateServiceContext(
+      serviceContext, 
+      detectedService, 
+      userMessage
+    );
+    setServiceContext(updatedServiceContext);
+    
+    // Add user message with enhanced metadata
     setChatMessages(prev => [...prev, { 
       role: 'user', 
       content: userMessage,
       timestamp: new Date().toISOString(),
-      language: detectedLang // Store detected language with the message
+      language: detectedLang,
+      detectedService: detectedService,
+      serviceContext: updatedServiceContext.currentService,
+      confidence: serviceDetection.confidence,
+      matchedTerms: serviceDetection.matchedTerms
     }]);
     
     setMessage('');
@@ -122,29 +158,55 @@ export default function ChatBot() {
       }
     }, 50);
     
-    // Process message and generate response using utility function
+    // Process message and generate response
     setTimeout(() => {
-      const responseData = processUserMessage(userMessage, chatbotData, detectedLang);
+      let responseData = processUserMessage(userMessage, chatbotData, detectedLang);
+      let finalResponse = responseData.text;
+      
+      // Enhanced response with service context and pricing information
+      if (detectedService && isPricingInquiry(userMessage, detectedLang)) {
+        // Generate enhanced pricing response using utility
+        const pricingResponse = generatePricingResponse(detectedService, detectedLang, pricingData);
+        finalResponse = pricingResponse;
+      } else if (detectedService && !isPricingInquiry(userMessage, detectedLang)) {
+        // Provide service information with context
+        const serviceResponse = getServiceResponse(detectedService, chatbotData, detectedLang);
+        if (serviceResponse && serviceResponse !== responseData.text) {
+          finalResponse = serviceResponse;
+        }
+      }
+      
+      // Add conversation insights for high engagement
+      const insights = getConversationInsights(updatedServiceContext);
+      if (insights.insights.includes('Deep engagement detected')) {
+        const engagementNote = detectedLang === 'sw' ? 
+          '\n\n💡 Ninaona una maswali mengi. Je, ungependa kuongea na mtaalamu wetu moja kwa moja?' :
+          '\n\n💡 I can see you have many questions. Would you like to speak with our specialist directly?';
+        finalResponse += engagementNote;
+      }
       
       setChatMessages(prev => [...prev, { 
         role: 'bot', 
-        content: responseData.text,
+        content: finalResponse,
         timestamp: new Date().toISOString(),
-        language: detectedLang // Bot responds in same language
+        language: detectedLang,
+        serviceContext: updatedServiceContext.currentService,
+        conversationDepth: updatedServiceContext.conversationDepth,
+        insights: insights
       }]);
       
-      // Update suggestions using generateSuggestions utility
-      setSuggestions(responseData.suggestions || []);
+      // Generate enhanced contextual suggestions using utility
+      const contextualPrompts = generateContextualPrompts(
+        updatedServiceContext.currentService, 
+        updatedServiceContext.conversationDepth, 
+        detectedLang,
+        updatedServiceContext
+      );
       
-      // Try to identify service from response
-      if (responseData.text.startsWith('**')) {
-        const serviceTitle = responseData.text.split('\n')[0].replace(/\*\*/g, '');
-        if (chatbotData.serviceDescriptions[detectedLang]?.[serviceTitle]) {
-          setActiveService(serviceTitle);
-        }
-      } else {
-        setActiveService(null);
-      }
+      setSuggestions(contextualPrompts.length > 0 ? contextualPrompts : responseData.suggestions || []);
+      
+      // Update active service
+      setActiveService(updatedServiceContext.currentService);
       
       setIsTyping(false);
     }, 1500);
@@ -156,42 +218,78 @@ export default function ChatBot() {
     setTimeout(() => handleMessageSend(), 300);
   };
 
-  // Additional utility function for manual service lookup
+  // Enhanced service lookup with advanced context management
   const handleServiceLookup = (serviceName) => {
     const matchedService = findMatchingService(serviceName, chatbotData.serviceKeywords, language);
     if (matchedService) {
       const serviceResponse = getServiceResponse(matchedService, chatbotData, language);
+      
+      // Update service context using utility function
+      const updatedContext = updateServiceContext(serviceContext, matchedService, `Service lookup: ${serviceName}`);
+      setServiceContext(updatedContext);
+      
       setChatMessages(prev => [...prev, { 
         role: 'bot', 
         content: serviceResponse,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        serviceContext: matchedService,
+        trigger: 'service_lookup'
       }]);
+      
       setActiveService(matchedService);
-      setSuggestions(generateSuggestions(matchedService, chatbotData, language));
+      
+      // Generate contextual suggestions for the new service
+      const contextualPrompts = generateContextualPrompts(matchedService, 0, language, updatedContext);
+      setSuggestions(contextualPrompts);
     }
   };
 
-  // Additional utility function for FAQ lookup
+  // FAQ lookup with context awareness
   const handleFaqLookup = (question) => {
     const faqAnswer = findFaqMatch(question, chatbotData.faqs, language);
     if (faqAnswer) {
+      // Update context to track FAQ interaction
+      const updatedContext = updateServiceContext(serviceContext, null, `FAQ: ${question}`);
+      setServiceContext(updatedContext);
+      
       setChatMessages(prev => [...prev, { 
         role: 'bot', 
         content: faqAnswer,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        trigger: 'faq_lookup'
       }]);
     }
   };
 
-  // Contact information handler
+  // Enhanced contact information handler
   const handleContactRequest = () => {
     const contactResponse = getContactResponse(chatbotData.contactInfo, language);
+    
+    // Add personalized message based on service context
+    let personalizedContact = contactResponse;
+    if (serviceContext.currentService) {
+      const serviceNote = language === 'sw' ? 
+        `\n\n📋 Kwa maswali maalum kuhusu ${serviceContext.currentService}, wasiliana nasi moja kwa moja.` :
+        `\n\n📋 For specific questions about ${serviceContext.currentService}, contact us directly.`;
+      personalizedContact += serviceNote;
+    }
+    
     setChatMessages(prev => [...prev, { 
       role: 'bot', 
-      content: contactResponse,
-      timestamp: new Date().toISOString()
+      content: personalizedContact,
+      timestamp: new Date().toISOString(),
+      trigger: 'contact_request',
+      serviceContext: serviceContext.currentService
     }]);
   };
+
+  // Service context validation on component update
+  useEffect(() => {
+    if (!validateServiceContext(serviceContext)) {
+      console.warn('Invalid service context detected, resetting...');
+      setServiceContext(createFreshServiceContext());
+    }
+  }, [serviceContext]);
 
   // Use useState to track if we're on a small screen
   const [isSmallScreen, setIsSmallScreen] = useState(false);
@@ -207,6 +305,13 @@ export default function ChatBot() {
     
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
+
+  // Debug service context (remove in production)
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Service Context Updated:', serviceContext);
+    }
+  }, [serviceContext]);
   
   return (
     <div className="fixed bottom-6 right-6 z-40 sm:z-40" ref={containerRef}>
@@ -237,6 +342,9 @@ export default function ChatBot() {
               title={chatbotData.ui.title[language]} 
               onClose={() => setIsChatOpen(false)}
               isFullScreen={isSmallScreen}
+              // Enhanced service context indicator
+              serviceContext={serviceContext.currentService}
+              conversationDepth={serviceContext.conversationDepth}
             />
             
             <ChatMessages 
@@ -244,6 +352,9 @@ export default function ChatBot() {
               isTyping={isTyping}
               chatEndRef={chatEndRef}
               chatScrollRef={chatScrollRef}
+              // Enhanced service context for message display
+              serviceContext={serviceContext}
+              insights={getConversationInsights(serviceContext)}
             />
             
             <div 
@@ -255,7 +366,10 @@ export default function ChatBot() {
             >
               <QuickPrompts 
                 suggestions={suggestions} 
-                onSelect={handleQuickPrompt} 
+                onSelect={handleQuickPrompt}
+                // Enhanced service context for better prompt categorization
+                serviceContext={serviceContext}
+                conversationDepth={serviceContext.conversationDepth}
               />
               
               <ChatInput 
@@ -266,11 +380,24 @@ export default function ChatBot() {
                 placeholder={chatbotData.ui.inputPlaceholder[language]}
               />
               
-              {/* Contact info button using utility function */}
-              <div className="flex justify-center pt-1">
+              {/* Enhanced service context indicator and contact info button */}
+              <div className="flex justify-between items-center pt-1">
+                {serviceContext.currentService && (
+                  <div className="flex items-center gap-2 text-xs">
+                    <div className="text-blue-400 opacity-70">
+                      {language === 'sw' ? 'Tunazungumza kuhusu' : 'Discussing'}: {serviceContext.currentService}
+                    </div>
+                    {serviceContext.conversationDepth > 3 && (
+                      <div className="bg-blue-500/20 text-blue-300 px-2 py-1 rounded-full text-xs">
+                        {language === 'sw' ? 'Mazungumzo ya kina' : 'Deep conversation'}
+                      </div>
+                    )}
+                  </div>
+                )}
+                
                 <motion.button
                   onClick={handleContactRequest}
-                  className="text-xs text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1"
+                  className="text-xs text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1 ml-auto"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   style={{ textShadow: '0 0 10px rgba(59, 130, 246, 0.3)' }}
@@ -281,6 +408,13 @@ export default function ChatBot() {
                   }
                 </motion.button>
               </div>
+
+              {/* Service history indicator */}
+              {serviceContext.serviceHistory.length > 1 && (
+                <div className="text-xs text-gray-400 opacity-60">
+                  {language === 'sw' ? 'Huduma zilizojadiliwa' : 'Services discussed'}: {serviceContext.serviceHistory.join(', ')}
+                </div>
+              )}
             </div>
           </motion.div>
         )}
@@ -330,6 +464,21 @@ export default function ChatBot() {
         
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
           background-color: rgba(75, 85, 99, 0.7);
+        }
+
+        /* Enhanced service context indicators */
+        .service-indicator {
+          background: linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
+          border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .deep-conversation-badge {
+          animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+          0%, 100% { opacity: 0.7; }
+          50% { opacity: 1; }
         }
       `}</style>
     </div>

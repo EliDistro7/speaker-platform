@@ -1,10 +1,17 @@
 // File: app/components/layout/ChatBot/ChatMessages.jsx
-import { Clock } from 'lucide-react';
+import { Clock, Brain, Target, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import { chatBubbleVariants, typingIndicatorVariants } from './animations';
 
-export default function ChatMessages({ messages, isTyping, chatEndRef, chatScrollRef }) {
+export default function ChatMessages({ 
+  messages, 
+  isTyping, 
+  chatEndRef, 
+  chatScrollRef, 
+  serviceContext, 
+  insights 
+}) {
   // Format message content with markdown support
   const formatMessageContent = (content) => {
     return (
@@ -62,6 +69,52 @@ export default function ChatMessages({ messages, isTyping, chatEndRef, chatScrol
     );
   };
 
+  // Render service context indicator for messages
+  const renderServiceContextIndicator = (messageServiceContext, detectedService) => {
+    const context = messageServiceContext || detectedService;
+    if (!context) return null;
+
+    // Handle both string and object contexts
+    const contextName = typeof context === 'string' ? context : context.currentService || 'Unknown';
+
+    return (
+      <div className="flex items-center gap-1 text-xs text-blue-400 opacity-70 mt-1">
+        <Target size={10} />
+        <span>{contextName}</span>
+      </div>
+    );
+  };
+
+  // Render conversation insights indicator
+  const renderInsightsIndicator = (messageInsights) => {
+    if (!messageInsights || !messageInsights.insights || messageInsights.insights.length === 0) return null;
+
+    // Ensure insights is an array and contains only strings
+    const insightsArray = Array.isArray(messageInsights.insights) ? messageInsights.insights : [];
+    const validInsights = insightsArray.filter(insight => typeof insight === 'string');
+
+    if (validInsights.length === 0) return null;
+
+    return (
+      <div className="flex items-center gap-1 text-xs text-purple-400 opacity-70 mt-1">
+        <Brain size={10} />
+        <span>{validInsights.join(', ')}</span>
+      </div>
+    );
+  };
+
+  // Render conversation depth indicator
+  const renderDepthIndicator = (conversationDepth) => {
+    if (!conversationDepth || conversationDepth <= 2) return null;
+
+    return (
+      <div className="flex items-center gap-1 text-xs text-green-400 opacity-70 mt-1">
+        <TrendingUp size={10} />
+        <span>Depth: {conversationDepth}</span>
+      </div>
+    );
+  };
+
   return (
     <div 
       className="flex-1 overflow-hidden flex flex-col relative"
@@ -79,6 +132,31 @@ export default function ChatMessages({ messages, isTyping, chatEndRef, chatScrol
           }}
         ></div>
       </div>
+
+      {/* Service context header - shows current active service */}
+      {serviceContext && serviceContext.currentService && (
+        <div className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 border-b border-blue-500/20 p-2 z-10">
+          <div className="flex items-center justify-center gap-2 text-sm text-blue-300">
+            <Target size={14} />
+            <span>Current Focus: {serviceContext.currentService}</span>
+            {serviceContext.conversationDepth > 3 && (
+              <span className="bg-blue-500/20 text-blue-300 px-2 py-1 rounded-full text-xs ml-2">
+                Deep Discussion
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Conversation insights banner */}
+      {insights && insights.insights && insights.insights.length > 0 && (
+        <div className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 border-b border-purple-500/20 p-2 z-10">
+          <div className="flex items-center justify-center gap-2 text-sm text-purple-300">
+            <Brain size={14} />
+            <span>{insights.insights.join(' • ')}</span>
+          </div>
+        </div>
+      )}
     
       {/* Actual scrollable messages container */}
       <div 
@@ -99,7 +177,7 @@ export default function ChatMessages({ messages, isTyping, chatEndRef, chatScrol
             className={`mb-4 ${msg.role === 'user' ? 'flex justify-end' : 'flex justify-start'}`}
           >
             <div 
-              className={`px-4 py-3 rounded-2xl max-w-[85%] shadow-md ${
+              className={`px-4 py-3 rounded-2xl max-w-[85%] shadow-md relative ${
                 msg.role === 'user' 
                   ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-br-none border border-blue-500' 
                   : 'bg-gradient-to-br from-gray-700 to-gray-800 text-gray-100 rounded-bl-none border border-gray-600'
@@ -110,14 +188,48 @@ export default function ChatMessages({ messages, isTyping, chatEndRef, chatScrol
                   : { boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)' }
               }
             >
-              {formatMessageContent(msg.content)}
-              
-              {msg.timestamp && (
-                <div className="flex items-center text-xs opacity-60 mt-1">
-                  <Clock size={10} className="mr-1" />
-                  {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              {/* Enhanced service context indicator for messages with detected service */}
+              {(msg.serviceContext || msg.detectedService) && (
+                <div className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs px-1 py-0.5 rounded-full opacity-60">
+                  <Target size={8} />
                 </div>
               )}
+
+              {formatMessageContent(msg.content)}
+              
+              {/* Message metadata section */}
+              <div className="mt-2 space-y-1">
+                {/* Service context indicator */}
+                {renderServiceContextIndicator(msg.serviceContext, msg.detectedService)}
+                
+                {/* Conversation insights */}
+                {renderInsightsIndicator(msg.insights)}
+                
+                {/* Conversation depth */}
+                {renderDepthIndicator(msg.conversationDepth)}
+                
+                {/* Confidence and matched terms for user messages */}
+                {msg.role === 'user' && msg.confidence && (
+                  <div className="flex items-center gap-2 text-xs opacity-50">
+                    {msg.confidence > 0.7 && (
+                      <span className="text-green-400">High confidence</span>
+                    )}
+                    {msg.matchedTerms && Array.isArray(msg.matchedTerms) && msg.matchedTerms.length > 0 && (
+                      <span className="text-yellow-400">
+                        Matched: {msg.matchedTerms.slice(0, 2).join(', ')}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {/* Timestamp */}
+                {msg.timestamp && (
+                  <div className="flex items-center text-xs opacity-60 mt-1">
+                    <Clock size={10} className="mr-1" />
+                    {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                )}
+              </div>
             </div>
           </motion.div>
         ))}
