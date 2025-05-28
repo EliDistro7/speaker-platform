@@ -21,7 +21,7 @@ const SocialMediaFooter = ({
       instagram: "https://instagram.com/speaker",
       linkedin: "https://linkedin.com/in/speaker",
       youtube: "https://youtube.com/@speaker",
-      whatsapp: "+1234567890",
+      whatsapp: "+255617833806",
       email: "hello@speaker.com",
       phone: "+1 (555) 123-4567"
     }
