@@ -1,8 +1,8 @@
 // File: app/components/layout/ChatBot/index.jsx
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { Sparkles, MessageCircle } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Sparkles, MessageCircle, X, Minimize2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/language';
 import { chatbotData } from '@/data/chat/index';
@@ -50,6 +50,7 @@ export default function ChatBot() {
   const [chatMessages, setChatMessages] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
   const [activeService, setActiveService] = useState(null);
+  const [isClosing, setIsClosing] = useState(false);
   
   // Enhanced service context using utility functions
   const [serviceContext, setServiceContext] = useState(() => createFreshServiceContext());
@@ -90,23 +91,140 @@ export default function ChatBot() {
     }
   }, [isChatOpen]);
 
-  // Manage outside clicks to close chat
+  // Enhanced close handler with cleanup
+  const handleCloseChat = useCallback((shouldSave = false) => {
+    setIsClosing(true);
+    
+    // Optional: Save conversation state before closing
+    if (shouldSave && chatMessages.length > 1) {
+      try {
+        const conversationState = {
+          messages: chatMessages,
+          serviceContext: serviceContext,
+          activeService: activeService,
+          timestamp: new Date().toISOString(),
+          language: language
+        };
+        
+        // Store in sessionStorage for potential restoration
+        sessionStorage.setItem('chatbot_last_conversation', JSON.stringify(conversationState));
+        
+        console.log('Conversation saved before closing');
+      } catch (error) {
+        console.warn('Failed to save conversation state:', error);
+      }
+    }
+    
+    // Clear typing state
+    setIsTyping(false);
+    
+    // Reset message input
+    setMessage('');
+    
+    // Close chat with animation delay
+    setTimeout(() => {
+      setIsChatOpen(false);
+      setIsClosing(false);
+    }, 200);
+    
+    // Optional: Reset conversation after closing (uncomment if desired)
+    // setTimeout(() => {
+    //   setChatMessages([{ role: 'bot', content: chatbotData.welcome[language] }]);
+    //   setServiceContext(createFreshServiceContext());
+    //   setActiveService(null);
+    //   setSuggestions(chatbotData.prompts[language]);
+    // }, 500);
+    
+  }, [chatMessages, serviceContext, activeService, language]);
+
+  // Enhanced outside click handler
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (containerRef.current && !containerRef.current.contains(event.target) && isChatOpen) {
-        setIsChatOpen(false);
+      if (containerRef.current && 
+          !containerRef.current.contains(event.target) && 
+          isChatOpen && 
+          !isClosing) {
+        
+        // Add a small delay to prevent accidental closes
+        setTimeout(() => {
+          if (isChatOpen && !isClosing) {
+            handleCloseChat(true); // Save conversation when closing via outside click
+          }
+        }, 100);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    if (isChatOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isChatOpen]);
+  }, [isChatOpen, isClosing, handleCloseChat]);
+
+  // Keyboard shortcut for closing (ESC key)
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape' && isChatOpen && !isClosing) {
+        event.preventDefault();
+        handleCloseChat(true);
+      }
+    };
+
+    if (isChatOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isChatOpen, isClosing, handleCloseChat]);
+
+  // Optional: Restore previous conversation
+  const restorePreviousConversation = useCallback(() => {
+    try {
+      const savedConversation = sessionStorage.getItem('chatbot_last_conversation');
+      if (savedConversation) {
+        const conversationState = JSON.parse(savedConversation);
+        
+        // Check if conversation is recent (within last hour)
+        const savedTime = new Date(conversationState.timestamp);
+        const currentTime = new Date();
+        const timeDiff = currentTime - savedTime;
+        const oneHour = 60 * 60 * 1000;
+        
+        if (timeDiff < oneHour && conversationState.messages.length > 1) {
+          setChatMessages(conversationState.messages);
+          setServiceContext(conversationState.serviceContext || createFreshServiceContext());
+          setActiveService(conversationState.activeService);
+          
+          // Add restoration message
+          const restoreMessage = language === 'sw' ? 
+            '↩️ Mazungumzo yako ya awali yamerejesha.' : 
+            '↩️ Your previous conversation has been restored.';
+          
+          setTimeout(() => {
+            setChatMessages(prev => [...prev, {
+              role: 'bot',
+              content: restoreMessage,
+              timestamp: new Date().toISOString(),
+              isSystemMessage: true
+            }]);
+          }, 500);
+          
+          return true;
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to restore conversation:', error);
+    }
+    return false;
+  }, [language]);
 
   // Enhanced message processing with advanced service context management
   const handleMessageSend = () => {
-    if (!message.trim()) return;
+    if (!message.trim() || isClosing) return;
     
     const userMessage = message.trim();
     
@@ -213,6 +331,7 @@ export default function ChatBot() {
   };
 
   const handleQuickPrompt = (prompt) => {
+    if (isClosing) return;
     setMessage(prompt);
     // Auto-submit the prompt after a brief delay
     setTimeout(() => handleMessageSend(), 300);
@@ -306,6 +425,21 @@ export default function ChatBot() {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
+  // Handle opening chat with optional conversation restoration
+  const handleOpenChat = () => {
+    setIsChatOpen(true);
+    
+    // Try to restore previous conversation
+    setTimeout(() => {
+      const restored = restorePreviousConversation();
+      if (!restored) {
+        // If no conversation was restored, show fresh welcome message
+        setChatMessages([{ role: 'bot', content: chatbotData.welcome[language] }]);
+        setSuggestions(chatbotData.prompts[language]);
+      }
+    }, 300);
+  };
+
   // Debug service context (remove in production)
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
@@ -316,7 +450,7 @@ export default function ChatBot() {
   return (
     <div className="fixed bottom-6 right-6 z-40 sm:z-40" ref={containerRef}>
       {!isChatOpen && (
-        <FloatingButton onClick={() => setIsChatOpen(true)} />
+        <FloatingButton onClick={handleOpenChat} />
       )}
       
       <AnimatePresence>
@@ -330,22 +464,61 @@ export default function ChatBot() {
               ${isSmallScreen ? 'fixed inset-0 w-full h-full max-h-full rounded-none' : 
               'w-80 md:w-96 h-[32rem] rounded-2xl max-h-[85vh]'} 
               bg-gray-900 shadow-2xl overflow-hidden flex flex-col border border-gray-700 backdrop-blur-lg
-              z-50
+              z-50 ${isClosing ? 'pointer-events-none' : ''}
             `}
             style={{
               backgroundColor: 'rgba(17, 24, 39, 0.95)',
               backdropFilter: 'blur(12px)',
-              boxShadow: isSmallScreen ? 'none' : '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+              boxShadow: isSmallScreen ? 'none' : '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+              opacity: isClosing ? 0.8 : 1,
+              transition: 'opacity 0.2s ease-out'
             }}
           >
-            <ChatHeader 
-              title={chatbotData.ui.title[language]} 
-              onClose={() => setIsChatOpen(false)}
-              isFullScreen={isSmallScreen}
-              // Enhanced service context indicator
-              serviceContext={serviceContext.currentService}
-              conversationDepth={serviceContext.conversationDepth}
-            />
+            {/* Enhanced Chat Header with better close button */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-700 bg-gradient-to-r from-blue-900/50 to-purple-900/50">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-white font-medium text-sm">
+                    {chatbotData.ui.title[language]}
+                  </h3>
+                  {serviceContext.currentService && (
+                    <p className="text-blue-300 text-xs opacity-80">
+                      {language === 'sw' ? 'Tunazungumza kuhusu' : 'Discussing'}: {serviceContext.currentService}
+                    </p>
+                  )}
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                {/* Minimize button for mobile */}
+                {isSmallScreen && (
+                  <motion.button
+                    onClick={() => handleCloseChat(true)}
+                    className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-all duration-200"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    disabled={isClosing}
+                  >
+                    <Minimize2 className="w-4 h-4" />
+                  </motion.button>
+                )}
+                
+                {/* Close button */}
+                <motion.button
+                  onClick={() => handleCloseChat(true)}
+                  className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-red-500/20 rounded-lg transition-all duration-200 group"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  disabled={isClosing}
+                  title={language === 'sw' ? 'Funga mazungumzo' : 'Close chat'}
+                >
+                  <X className="w-4 h-4 group-hover:text-red-400 transition-colors" />
+                </motion.button>
+              </div>
+            </div>
             
             <ChatMessages 
               messages={chatMessages}
@@ -370,6 +543,7 @@ export default function ChatBot() {
                 // Enhanced service context for better prompt categorization
                 serviceContext={serviceContext}
                 conversationDepth={serviceContext.conversationDepth}
+                disabled={isClosing}
               />
               
               <ChatInput 
@@ -378,6 +552,7 @@ export default function ChatBot() {
                 onSend={handleMessageSend}
                 inputRef={inputRef}
                 placeholder={chatbotData.ui.inputPlaceholder[language]}
+                disabled={isClosing}
               />
               
               {/* Enhanced service context indicator and contact info button */}
@@ -400,6 +575,7 @@ export default function ChatBot() {
                   className="text-xs text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1 ml-auto"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  disabled={isClosing}
                   style={{ textShadow: '0 0 10px rgba(59, 130, 246, 0.3)' }}
                 >
                   {chatbotData.ui.contactUs && chatbotData.ui.contactUs[language] ? 
@@ -413,6 +589,13 @@ export default function ChatBot() {
               {serviceContext.serviceHistory.length > 1 && (
                 <div className="text-xs text-gray-400 opacity-60">
                   {language === 'sw' ? 'Huduma zilizojadiliwa' : 'Services discussed'}: {serviceContext.serviceHistory.join(', ')}
+                </div>
+              )}
+
+              {/* ESC hint for desktop */}
+              {!isSmallScreen && (
+                <div className="text-xs text-gray-500 opacity-50 text-center">
+                  {language === 'sw' ? 'Bonyeza ESC kufunga' : 'Press ESC to close'}
                 </div>
               )}
             </div>
@@ -479,6 +662,13 @@ export default function ChatBot() {
         @keyframes pulse {
           0%, 100% { opacity: 0.7; }
           50% { opacity: 1; }
+        }
+
+        /* Closing animation styles */
+        .closing-chat {
+          transition: all 0.3s ease-out;
+          transform: scale(0.95);
+          opacity: 0.7;
         }
       `}</style>
     </div>
