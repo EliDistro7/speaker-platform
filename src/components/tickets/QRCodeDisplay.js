@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { QrCode, Scan, CheckCircle, Smartphone } from 'lucide-react';
 import { useLanguage } from '@/contexts/language';
 
+
 const translations = {
   en: {
     qrCode: 'QR Code',

@@ -73,7 +73,7 @@ export const ProgressBar = ({
   
   return (
     <motion.div 
-      className={`w-full ${className}`}
+      className={`w-full pt-6 ${className}`}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}

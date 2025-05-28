@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/Button';
 import { QRCodeDisplay } from '@/components/tickets/QRCodeDisplay';
 import ProfileBanner from '@/components/banners/ProfileBanner';
 import { speaker, events } from '@/data/index'; // Adjust the import path as needed
+import SocialFooter from '@/components/layout/Footer';
 
 const translations = {
   en: {
@@ -260,39 +261,10 @@ const Main = () => {
               <span className="text-blue-700 font-semibold">{t.experienceExcellence}</span>
             </motion.div>
             
-            <motion.h1
-              initial={{ y: 50, opacity: 0 }}
-              animate={heroInView ? { y: 0, opacity: 1 } : { y: 50, opacity: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-6 leading-tight"
-            >
-              {t.welcome}
-            </motion.h1>
+         
             
-            <motion.p
-              initial={{ y: 50, opacity: 0 }}
-              animate={heroInView ? { y: 0, opacity: 1 } : { y: 50, opacity: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-              className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed"
-            >
-              {t.transformYourJourney}
-            </motion.p>
-            
-            <motion.div
-              initial={{ y: 50, opacity: 0 }}
-              animate={heroInView ? { y: 0, opacity: 1 } : { y: 50, opacity: 0 }}
-              transition={{ duration: 0.8, delay: 0.8 }}
-              className="flex flex-wrap justify-center gap-4 text-sm text-gray-500"
-            >
-              <div className="flex items-center space-x-2 bg-white/60 backdrop-blur-sm rounded-full px-4 py-2">
-                <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                <span>{speaker.rating} {t.rating}</span>
-              </div>
-              <div className="flex items-center space-x-2 bg-white/60 backdrop-blur-sm rounded-full px-4 py-2">
-                <Globe className="w-4 h-4 text-blue-500" />
-                <span>{speaker.totalSpeaks} {t.totalSpeaks}</span>
-              </div>
-            </motion.div>
+         
+           
           </div>
         </motion.div>
       )}
@@ -444,6 +416,8 @@ const Main = () => {
           </Modal>
         )}
       </AnimatePresence>
+
+      <SocialFooter />
     </div>
   );
 };

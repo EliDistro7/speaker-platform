@@ -74,22 +74,18 @@ export const ContactInfo = ({ speaker }) => {
     switch(type) {
       case 'email': return {
         bg: 'from-blue-500 via-cyan-500 to-blue-600',
-        glow: 'from-blue-400/30 via-cyan-400/30 to-blue-500/30',
         hover: 'from-blue-600 via-cyan-600 to-blue-700'
       };
       case 'phone': return {
         bg: 'from-emerald-500 via-green-500 to-teal-600',
-        glow: 'from-emerald-400/30 via-green-400/30 to-teal-500/30',
         hover: 'from-emerald-600 via-green-600 to-teal-700'
       };
       case 'website': return {
         bg: 'from-violet-500 via-purple-500 to-indigo-600',
-        glow: 'from-violet-400/30 via-purple-400/30 to-indigo-500/30',
         hover: 'from-violet-600 via-purple-600 to-indigo-700'
       };
       default: return {
         bg: 'from-indigo-500 via-purple-500 to-pink-600',
-        glow: 'from-indigo-400/30 via-purple-400/30 to-pink-500/30',
         hover: 'from-indigo-600 via-purple-600 to-pink-700'
       };
     }
@@ -104,39 +100,36 @@ export const ContactInfo = ({ speaker }) => {
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
-      className="mb-12 relative"
+      className="mb-8 relative"
     >
-      {/* Ambient background glow */}
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-purple-50/40 to-pink-50/80 rounded-3xl blur-3xl -z-10" />
-      
       {/* Header Section */}
       <motion.div 
-        className="flex items-center space-x-4 mb-8 relative"
+        className="flex items-center space-x-3 mb-6 px-2"
         initial={{ opacity: 0, x: -30 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
       >
         <div className="relative group">
-          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-300" />
-          <div className="relative flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 shadow-xl">
-            <Sparkles className="h-6 w-6 text-white animate-pulse" />
+          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl blur-sm opacity-75 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 shadow-lg">
+            <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-white animate-pulse" />
           </div>
         </div>
-        <div className="flex-1">
-          <h3 className="text-2xl font-bold bg-gradient-to-r from-neutral-900 via-indigo-900 to-purple-900 bg-clip-text text-transparent mb-2">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-neutral-800 via-indigo-800 to-purple-800 bg-clip-text text-transparent">
             {t.contactInfo}
           </h3>
           <motion.div 
-            className="h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full"
+            className="h-1 sm:h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full mt-1"
             initial={{ width: 0 }}
-            animate={{ width: '4rem' }}
+            animate={{ width: '3rem' }}
             transition={{ duration: 0.8, delay: 0.4 }}
           />
         </div>
       </motion.div>
 
       {/* Contact Details Grid */}
-      <div className="space-y-5">
+      <div className="space-y-3 sm:space-y-4">
         {contactDetails.map((detail, index) => {
           const colors = getGradientColors(detail.type);
           
@@ -153,51 +146,48 @@ export const ContactInfo = ({ speaker }) => {
               }}
               whileHover={{ 
                 scale: 1.02, 
-                y: -4,
+                y: -2,
                 transition: { duration: 0.2, ease: "easeOut" }
               }}
             >
-              {/* Main Card */}
-              <div className="relative bg-white/80 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/60 group-hover:shadow-2xl transition-all duration-500">
-                
-                {/* Animated background gradient */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${colors.glow} opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity duration-500`} />
+              {/* Main Card - Transparent with subtle backdrop */}
+              <div className="relative bg-white/20 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 shadow-sm border border-white/30 group-hover:shadow-lg group-hover:bg-white/30 transition-all duration-300">
                 
                 {/* Shimmer effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out rounded-xl sm:rounded-2xl" />
                 
                 <div className="relative flex items-center justify-between">
-                  <div className="flex items-center space-x-5 flex-1 min-w-0">
+                  <div className="flex items-center space-x-3 sm:space-x-4 flex-1 min-w-0">
                     {/* Enhanced Icon */}
-                    <div className="relative group/icon">
-                      <div className={`absolute inset-0 bg-gradient-to-r ${colors.bg} rounded-xl blur-md opacity-75 group-hover:opacity-100 group-hover:blur-lg transition-all duration-300`} />
-                      <div className={`relative flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-r ${colors.bg} shadow-lg group-hover/icon:scale-110 transition-transform duration-300`}>
-                        <detail.icon className="h-6 w-6 text-white group-hover/icon:rotate-12 transition-transform duration-300" />
+                    <div className="relative group/icon flex-shrink-0">
+                      <div className={`absolute inset-0 bg-gradient-to-r ${colors.bg} rounded-lg sm:rounded-xl blur-sm opacity-75 group-hover:opacity-100 transition-all duration-300`} />
+                      <div className={`relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg sm:rounded-xl bg-gradient-to-r ${colors.bg} shadow-lg group-hover/icon:scale-110 transition-transform duration-300`}>
+                        <detail.icon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-white group-hover/icon:rotate-12 transition-transform duration-300" />
                       </div>
                     </div>
                     
                     {/* Enhanced Contact Details */}
                     <div className="flex-1 min-w-0">
                       <motion.p 
-                        className="text-sm font-semibold text-neutral-500 mb-1.5 uppercase tracking-wider"
+                        className="text-xs sm:text-sm font-semibold text-neutral-600 mb-1 uppercase tracking-wider"
                         initial={{ opacity: 0.7 }}
                         whileHover={{ opacity: 1 }}
                       >
                         {detail.label}
                       </motion.p>
-                      <p className="text-neutral-800 font-bold text-lg truncate group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-indigo-600 group-hover:to-purple-600 transition-all duration-300">
+                      <p className="text-neutral-800 font-bold text-sm sm:text-base md:text-lg truncate group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-indigo-600 group-hover:to-purple-600 transition-all duration-300">
                         {detail.text}
                       </p>
                     </div>
                   </div>
 
                   {/* Enhanced Action Buttons */}
-                  <div className="flex items-center space-x-3 ml-6">
+                  <div className="flex items-center space-x-2 sm:space-x-3 ml-2 sm:ml-4 flex-shrink-0">
                     {/* Copy Button */}
                     <motion.button
                       onClick={() => copyToClipboard(detail.text, index)}
-                      className="relative p-3 rounded-xl text-neutral-400 hover:text-white bg-neutral-100 hover:bg-gradient-to-r hover:from-neutral-600 hover:to-neutral-700 transition-all duration-300 group/copy"
-                      whileHover={{ scale: 1.1, rotateY: 15 }}
+                      className="relative p-2 sm:p-2.5 md:p-3 rounded-lg sm:rounded-xl text-neutral-500 hover:text-white bg-white/40 hover:bg-gradient-to-r hover:from-neutral-600 hover:to-neutral-700 backdrop-blur-sm transition-all duration-300 group/copy"
+                      whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                       title={t.copyToClipboard}
                     >
@@ -210,7 +200,7 @@ export const ContactInfo = ({ speaker }) => {
                             exit={{ scale: 0, rotate: 180 }}
                             className="text-emerald-500"
                           >
-                            <Check className="h-5 w-5" />
+                            <Check className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5" />
                           </motion.div>
                         ) : (
                           <motion.div
@@ -219,7 +209,7 @@ export const ContactInfo = ({ speaker }) => {
                             animate={{ scale: 1 }}
                             exit={{ scale: 0 }}
                           >
-                            <Copy className="h-5 w-5 group-hover/copy:rotate-12 transition-transform duration-200" />
+                            <Copy className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 group-hover/copy:rotate-12 transition-transform duration-200" />
                           </motion.div>
                         )}
                       </AnimatePresence>
@@ -228,17 +218,16 @@ export const ContactInfo = ({ speaker }) => {
                     {/* Action Button */}
                     <motion.button
                       onClick={detail.action}
-                      className={`relative p-3 rounded-xl text-white bg-gradient-to-r ${colors.bg} hover:bg-gradient-to-r hover:${colors.hover} shadow-lg hover:shadow-xl transition-all duration-300 group/action overflow-hidden`}
+                      className={`relative p-2 sm:p-2.5 md:p-3 rounded-lg sm:rounded-xl text-white bg-gradient-to-r ${colors.bg} hover:bg-gradient-to-r hover:${colors.hover} shadow-lg hover:shadow-xl transition-all duration-300 group/action overflow-hidden`}
                       whileHover={{ 
-                        scale: 1.1, 
-                        rotateY: -15,
-                        boxShadow: `0 20px 40px -12px rgba(99, 102, 241, 0.4)`
+                        scale: 1.1,
+                        boxShadow: `0 10px 25px -5px rgba(99, 102, 241, 0.4)`
                       }}
                       whileTap={{ scale: 0.9 }}
                       title={detail.actionLabel}
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover/action:opacity-100 transition-opacity duration-300" />
-                      <ExternalLink className="relative h-5 w-5 group-hover/action:rotate-12 group-hover/action:scale-110 transition-transform duration-200" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover/action:opacity-100 transition-opacity duration-300 rounded-lg sm:rounded-xl" />
+                      <ExternalLink className="relative h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 group-hover/action:rotate-12 group-hover/action:scale-110 transition-transform duration-200" />
                     </motion.button>
                   </div>
                 </div>
@@ -247,13 +236,13 @@ export const ContactInfo = ({ speaker }) => {
                 <AnimatePresence>
                   {copiedItem === index && (
                     <motion.div
-                      initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                      initial={{ opacity: 0, y: 15, scale: 0.8 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -20, scale: 0.8 }}
-                      className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-emerald-500 to-green-500 text-white text-sm font-semibold px-4 py-2 rounded-full shadow-lg border-2 border-white"
+                      exit={{ opacity: 0, y: -15, scale: 0.8 }}
+                      className="absolute -top-3 sm:-top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-emerald-500 to-green-500 text-white text-xs sm:text-sm font-semibold px-3 py-1.5 sm:px-4 sm:py-2 rounded-full shadow-lg border-2 border-white z-10"
                     >
-                      <div className="flex items-center space-x-2">
-                        <Check className="h-4 w-4" />
+                      <div className="flex items-center space-x-1.5 sm:space-x-2">
+                        <Check className="h-3 w-3 sm:h-4 sm:w-4" />
                         <span>{t.copied}</span>
                       </div>
                     </motion.div>
@@ -267,16 +256,16 @@ export const ContactInfo = ({ speaker }) => {
 
       {/* Decorative Elements */}
       <motion.div
-        className="mt-10 flex justify-center"
+        className="mt-6 sm:mt-8 flex justify-center"
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8, delay: 1 }}
       >
-        <div className="flex space-x-2">
+        <div className="flex space-x-1.5 sm:space-x-2">
           {[...Array(3)].map((_, i) => (
             <motion.div
               key={i}
-              className="w-2 h-2 rounded-full bg-gradient-to-r from-indigo-400 to-purple-500"
+              className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-gradient-to-r from-indigo-400 to-purple-500"
               animate={{
                 scale: [1, 1.2, 1],
                 opacity: [0.5, 1, 0.5]
