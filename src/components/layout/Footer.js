@@ -22,8 +22,8 @@ const SocialMediaFooter = ({
       linkedin: "https://linkedin.com/in/speaker",
       youtube: "https://youtube.com/@speaker",
       whatsapp: "+255617833806",
-      email: "hello@speaker.com",
-      phone: "+1 (555) 123-4567"
+      email: "info@jamesmwangamba.com",
+      phone: "+255 617 833 806"
     }
   },
   language = 'en'
