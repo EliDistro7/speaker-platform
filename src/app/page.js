@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, Sparkles, Globe, Star } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import { useInView } from 'react-intersection-observer';
 import { useLanguage } from '@/contexts/language';
 import { Navigation } from '@/components/layout/Navigation';
@@ -20,8 +20,8 @@ import { PurchaseForm } from '@/components/forms/PurchaseForm';
 import { Button } from '@/components/ui/Button';
 import { QRCodeDisplay } from '@/components/tickets/QRCodeDisplay';
 import ProfileBanner from '@/components/banners/ProfileBanner';
-import ChatBot from '@/components/chatBot/index'; // Import ChatBot component
-import { speaker, events } from '@/data/index'; // Adjust the import path as needed
+import ChatBot from '@/components/chatBot/index';
+import { speaker, events } from '@/data/index';
 import SocialFooter from '@/components/layout/Footer';
 
 const translations = {
@@ -71,107 +71,32 @@ const translations = {
   }
 };
 
-// Floating particles animation component
-const FloatingParticles = () => {
-  const particles = Array.from({ length: 20 }, (_, i) => ({
-    id: i,
-    size: Math.random() * 4 + 2,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    duration: Math.random() * 20 + 10
-  }));
-
+// Simplified background component
+const Background = () => {
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden">
-      {particles.map((particle) => (
-        <motion.div
-          key={particle.id}
-          className="absolute rounded-full bg-gradient-to-r from-blue-400/20 to-purple-400/20"
-          style={{
-            width: particle.size,
-            height: particle.size,
-            left: `${particle.x}%`,
-            top: `${particle.y}%`,
-          }}
-          animate={{
-            y: [0, -30, 0],
-            x: [0, 15, -15, 0],
-            opacity: [0.3, 0.8, 0.3],
-            scale: [1, 1.2, 1]
-          }}
-          transition={{
-            duration: particle.duration,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-      ))}
+    <div className="fixed inset-0 -z-10">
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-100/60" />
+      <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-r from-blue-400/10 to-purple-600/10 rounded-full mix-blend-multiply filter blur-3xl" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-r from-cyan-400/10 to-blue-600/10 rounded-full mix-blend-multiply filter blur-3xl" />
     </div>
   );
 };
 
-// Enhanced background with gradient mesh
-const EnhancedBackground = () => {
-  return (
-    <div className="fixed inset-0 -z-10">
-      {/* Base gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50/80 to-indigo-100/90" />
-      
-      {/* Animated gradient orbs */}
-      <motion.div
-        className="absolute top-0 -left-4 w-72 h-72 bg-gradient-to-r from-blue-400/30 to-purple-600/30 rounded-full mix-blend-multiply filter blur-xl"
-        animate={{
-          x: [0, 50, -50, 0],
-          y: [0, -30, 30, 0],
-          scale: [1, 1.1, 0.9, 1]
-        }}
-        transition={{
-          duration: 20,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-      />
-      
-      <motion.div
-        className="absolute top-40 -right-4 w-72 h-72 bg-gradient-to-r from-cyan-400/30 to-blue-600/30 rounded-full mix-blend-multiply filter blur-xl"
-        animate={{
-          x: [0, -30, 30, 0],
-          y: [0, 50, -30, 0],
-          scale: [1, 0.8, 1.2, 1]
-        }}
-        transition={{
-          duration: 25,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-      />
-      
-      <motion.div
-        className="absolute -bottom-8 left-20 w-72 h-72 bg-gradient-to-r from-indigo-400/20 to-purple-600/20 rounded-full mix-blend-multiply filter blur-xl"
-        animate={{
-          x: [0, 40, -20, 0],
-          y: [0, -20, 20, 0],
-          scale: [1, 1.3, 0.7, 1]
-        }}
-        transition={{
-          duration: 30,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-      />
-    </div>
-  );
+// Page transition variants
+const pageVariants = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -20 }
 };
 
 const Main = () => {
   const { language } = useLanguage();
-  console.log('Current language:', language);
   const t = translations[language];
   
   const [currentView, setCurrentView] = useState('profile');
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [tickets, setTickets] = useState([]);
-  const [cartCount, setCartCount] = useState(0); // Add cart count state
+  const [cartCount, setCartCount] = useState(0);
   const [purchaseForm, setPurchaseForm] = useState({ 
     name: '', 
     email: '', 
@@ -179,18 +104,11 @@ const Main = () => {
     quantity: 1 
   });
 
-  // Intersection observer for animations
-  const [heroRef, heroInView] = useInView({
-    threshold: 0.1,
-    triggerOnce: true
-  });
-
+  // Simplified intersection observer
   const [contentRef, contentInView] = useInView({
     threshold: 0.1,
     triggerOnce: true
   });
-
- 
 
   const handlePurchase = () => {
     const newTicket = {
@@ -202,138 +120,110 @@ const Main = () => {
     };
     
     setTickets(prev => [...prev, newTicket]);
-    
-    // Show success message
     alert(t.purchaseCompleted);
     setSelectedEvent(null);
-    
-    // Reset form
     setPurchaseForm({ name: '', email: '', phone: '', quantity: 1 });
   };
 
-  // Function to handle cart updates from BooksShop
   const handleCartUpdate = (newCartCount) => {
     setCartCount(newCartCount);
   };
 
+  const renderProfileView = () => (
+    <div className="space-y-8">
+      {/* Profile Banner Card */}
+      <Card className="overflow-hidden bg-white/95 backdrop-blur-sm border border-gray-200 shadow-lg">
+        <ProfileBanner speaker={speaker} language={language} />
+      </Card>
+
+      {/* Main Profile Content */}
+      <div className="grid gap-8 lg:grid-cols-3">
+        {/* Left Column - Contact & Specialties */}
+        <div className="lg:col-span-1 space-y-6">
+          <Card className="bg-white/95 backdrop-blur-sm border border-gray-200 shadow-lg">
+            <ContactInfo speaker={speaker} />
+          </Card>
+          
+          <Card className="bg-white/95 backdrop-blur-sm border border-gray-200 shadow-lg">
+            <SpecialtiesList specialties={speaker.specialties} />
+          </Card>
+        </div>
+
+        {/* Right Column - Bio & Testimonials */}
+        <div className="lg:col-span-2 space-y-6">
+          <Card className="bg-white/95 backdrop-blur-sm border border-gray-200 shadow-lg">
+            <SpeakerBio bio={speaker.bio} />
+          </Card>
+          
+          <TestimonialsSection testimonials={speaker.testimonials} />
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderContent = () => {
+    switch (currentView) {
+      case 'profile':
+        return renderProfileView();
+      case 'events':
+        return <EventsList events={events} onRegister={setSelectedEvent} />;
+      case 'tickets':
+        return (
+          <TicketsList 
+            tickets={tickets}
+            onDownload={(ticket) => alert(`${t.downloadTicket}: ${ticket.id}`)}
+            onBrowseEvents={() => setCurrentView('events')}
+          />
+        );
+      case 'shop':
+        return <BooksShop speaker={speaker} onCartUpdate={handleCartUpdate} />;
+      default:
+        return renderProfileView();
+    }
+  };
+
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      <EnhancedBackground />
-      <FloatingParticles />
+    <div className="min-h-screen bg-gray-50">
+      <Background />
       
-      {/* Navigation with enhanced styling and cart count */}
-      <motion.div
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-      >
+      {/* Fixed Navigation */}
+      <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
         <Navigation 
           currentView={currentView}
           onViewChange={setCurrentView}
           speaker={speaker}
           ticketCount={tickets.length}
-          cartCount={cartCount} // Pass cart count to navigation
+          cartCount={cartCount}
         />
-      </motion.div>
+      </div>
 
-      {/* Profile Banner - only show on profile view 
-      {currentView === 'profile' && (
-        <ProfileBanner speaker={speaker} language={language}/>
-      )}
-        */}
+      {/* Main Content Container */}
+      <main className="relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <motion.div
+            ref={contentRef}
+            initial="initial"
+            animate={contentInView ? "animate" : "initial"}
+            variants={pageVariants}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentView}
+                initial="initial"
+                animate="animate" 
+                exit="exit"
+                variants={pageVariants}
+                transition={{ duration: 0.3 }}
+              >
+                {renderContent()}
+              </motion.div>
+            </AnimatePresence>
+          </motion.div>
+        </div>
+      </main>
 
-      {/* Hero Section - only show on profile view */}
-      {currentView === 'profile' && (
-        <motion.div
-          ref={heroRef}
-          className="relative z-10 pt-0 pb-12"
-          initial={{ opacity: 0 }}
-          animate={heroInView ? { opacity: 1 } : { opacity: 0 }}
-          transition={{ duration: 1 }}
-        >
-      
-        </motion.div>
-      )}
-      
-      {/* Main Content */}
-      <motion.div
-        ref={contentRef}
-        className={`relative z-10 ${currentView === 'profile' ? 'max-w-6xl mx-0 px-0 pb-16' : ''}`}
-        initial={{ opacity: 0, y: 50 }}
-        animate={contentInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-        transition={{ duration: 0.8 }}
-      >
-        <AnimatePresence mode="wait">
-          {currentView === 'profile' && (
-            <motion.div
-              key="profile"
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 50 }}
-              transition={{ duration: 0.5 }}
-              className="space-y-8"
-            >
-              <Card padding="p-0" className="overflow-hidden backdrop-blur-sm bg-white/90 border-white/20 shadow-2xl">
-                <ProfileBanner speaker={speaker} language={language} />
-                <div className="p-8 px-0">
-                 {/* <SpeakerBio bio={speaker.bio} /> */}
-                  <div className="grid md:grid-cols-2 gap-8 mt-8">
-                    <ContactInfo speaker={speaker} />
-                    <SpecialtiesList specialties={speaker.specialties} />
-                  </div>
-                </div>
-              </Card>
-              <TestimonialsSection testimonials={speaker.testimonials} />
-            </motion.div>
-          )}
-          
-          {currentView === 'events' && (
-            <motion.div
-              key="events"
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 50 }}
-              transition={{ duration: 0.5 }}
-            >
-              <EventsList events={events} onRegister={setSelectedEvent} />
-            </motion.div>
-          )}
-          
-          {currentView === 'tickets' && (
-            <motion.div
-              key="tickets"
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 50 }}
-              transition={{ duration: 0.5 }}
-            >
-              <TicketsList 
-                tickets={tickets}
-                onDownload={(ticket) => alert(`${t.downloadTicket}: ${ticket.id}`)}
-                onBrowseEvents={() => setCurrentView('events')}
-              />
-            </motion.div>
-          )}
-
-          {currentView === 'shop' && (
-            <motion.div
-              key="shop"
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 50 }}
-              transition={{ duration: 0.5 }}
-              className="w-full"
-            >
-              <BooksShop 
-                speaker={speaker} 
-                onCartUpdate={handleCartUpdate}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
-
-      {/* Enhanced Modal */}
+      {/* Purchase Modal */}
       <AnimatePresence>
         {selectedEvent && (
           <Modal
@@ -341,69 +231,44 @@ const Main = () => {
             onClose={() => setSelectedEvent(null)}
             title={t.registerForEvent}
           >
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="mb-6">
-                <motion.h3 
-                  className="text-xl font-semibold mb-4 text-gray-800"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.1 }}
-                >
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-xl font-semibold mb-4 text-gray-900">
                   {selectedEvent?.title}
-                </motion.h3>
+                </h3>
                 <EventDetails event={selectedEvent} />
               </div>
               
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <PurchaseForm 
-                  formData={purchaseForm}
-                  onChange={setPurchaseForm}
-                  event={selectedEvent}
-                />
-              </motion.div>
+              <PurchaseForm 
+                formData={purchaseForm}
+                onChange={setPurchaseForm}
+                event={selectedEvent}
+              />
               
-              <motion.div 
-                className="flex space-x-4 mt-6"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
+              <div className="flex gap-3 pt-4 border-t">
                 <Button 
                   variant="outline" 
                   onClick={() => setSelectedEvent(null)}
-                  className="flex-1 hover:scale-105 transition-transform duration-200"
+                  className="flex-1"
                 >
                   {t.cancel}
                 </Button>
                 <Button 
                   onClick={handlePurchase}
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 hover:scale-105 transition-all duration-200"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
                 >
-                  <motion.div
-                    className="flex items-center justify-center"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <CheckCircle className="w-5 h-5 mr-2" />
-                    {t.purchaseTickets}
-                  </motion.div>
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  {t.purchaseTickets}
                 </Button>
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
           </Modal>
         )}
       </AnimatePresence>
+
+      {/* Fixed Components */}
       <ChatBot />
-      <SocialFooter />  
+      <SocialFooter />
     </div>
   );
 };
