@@ -100,7 +100,7 @@ export const ContactInfo = ({ speaker }) => {
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
-      className="mb-8 relative"
+      className="mb-8 relative bg-transparent backdrop-blur-lg p-4 sm:p-6 md:p-8 rounded-xl shadow-lg border border-white/20 overflow-hidden"
     >
       {/* Header Section */}
       <motion.div 
@@ -151,10 +151,9 @@ export const ContactInfo = ({ speaker }) => {
               }}
             >
               {/* Main Card - Transparent with subtle backdrop */}
-              <div className="relative bg-white/20 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 shadow-sm border border-white/30 group-hover:shadow-lg group-hover:bg-white/30 transition-all duration-300">
+              <div className="relative rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 shadow-sm border border-white/30 group-hover:shadow-lg transition-all duration-300">
                 
-                {/* Shimmer effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out rounded-xl sm:rounded-2xl" />
+      
                 
                 <div className="relative flex items-center justify-between">
                   <div className="flex items-center space-x-3 sm:space-x-4 flex-1 min-w-0">

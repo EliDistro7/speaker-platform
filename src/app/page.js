@@ -245,34 +245,19 @@ const Main = () => {
       {currentView === 'profile' && (
         <motion.div
           ref={heroRef}
-          className="relative z-10 pt-20 pb-12"
+          className="relative z-10 pt-0 pb-12"
           initial={{ opacity: 0 }}
           animate={heroInView ? { opacity: 1 } : { opacity: 0 }}
           transition={{ duration: 1 }}
         >
-          <div className="max-w-6xl mx-auto px-4 text-center">
-            <motion.div
-              initial={{ y: 50, opacity: 0 }}
-              animate={heroInView ? { y: 0, opacity: 1 } : { y: 50, opacity: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="inline-flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 border border-blue-200/50 mb-8"
-            >
-              <Sparkles className="w-5 h-5 text-blue-600" />
-              <span className="text-blue-700 font-semibold">{t.experienceExcellence}</span>
-            </motion.div>
-            
-         
-            
-         
-           
-          </div>
+      
         </motion.div>
       )}
       
       {/* Main Content */}
       <motion.div
         ref={contentRef}
-        className={`relative z-10 ${currentView === 'profile' ? 'max-w-6xl mx-auto px-4 pb-16' : ''}`}
+        className={`relative z-10 ${currentView === 'profile' ? 'max-w-6xl mx-0 px-0 pb-16' : ''}`}
         initial={{ opacity: 0, y: 50 }}
         animate={contentInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
         transition={{ duration: 0.8 }}
@@ -288,8 +273,8 @@ const Main = () => {
               className="space-y-8"
             >
               <Card padding="p-0" className="overflow-hidden backdrop-blur-sm bg-white/90 border-white/20 shadow-2xl">
-                <SpeakerHeader speaker={speaker} />
-                <div className="p-8">
+                <ProfileBanner speaker={speaker} language={language} />
+                <div className="p-8 px-0">
                  {/* <SpeakerBio bio={speaker.bio} /> */}
                   <div className="grid md:grid-cols-2 gap-8 mt-8">
                     <ContactInfo speaker={speaker} />
