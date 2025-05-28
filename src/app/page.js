@@ -20,7 +20,7 @@ import { PurchaseForm } from '@/components/forms/PurchaseForm';
 import { Button } from '@/components/ui/Button';
 import { QRCodeDisplay } from '@/components/tickets/QRCodeDisplay';
 import ProfileBanner from '@/components/banners/ProfileBanner';
-import ChatBot from '@/components/ChatBot/index'; // Import ChatBot component
+import ChatBot from '@/components/chatBot/index'; // Import ChatBot component
 import { speaker, events } from '@/data/index'; // Adjust the import path as needed
 import SocialFooter from '@/components/layout/Footer';
 
