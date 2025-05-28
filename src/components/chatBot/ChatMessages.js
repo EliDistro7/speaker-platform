@@ -14,22 +14,46 @@ export default function ChatMessages({ messages, isTyping, chatEndRef, chatScrol
             <span className="font-semibold text-blue-300" {...props} />
           ),
           h1: ({ node, ...props }) => (
-            <h1 className="text-xl font-bold mb-2 text-white" {...props} />
+            <h1 className="text-xl font-bold mb-3 text-white" {...props} />
           ),
           h2: ({ node, ...props }) => (
             <h2 className="text-lg font-bold mb-2 text-white" {...props} />
           ),
           h3: ({ node, ...props }) => (
-            <h3 className="text-md font-bold mb-1 text-white" {...props} />
+            <h3 className="text-md font-bold mb-2 text-white" {...props} />
           ),
-          p: ({ node, ...props }) => (
-            <p className="mb-2 leading-relaxed" {...props} />
-          ),
+          p: ({ node, children, ...props }) => {
+            // Handle paragraphs with better spacing and line break preservation
+            return (
+              <p className="mb-3 leading-relaxed" {...props}>
+                {children}
+              </p>
+            );
+          },
           ul: ({ node, ...props }) => (
-            <ul className="list-disc pl-4 mb-2" {...props} />
+            <ul className="list-disc pl-4 mb-3 space-y-1" {...props} />
           ),
           li: ({ node, ...props }) => (
-            <li className="mb-1" {...props} />
+            <li className="mb-1 leading-relaxed" {...props} />
+          ),
+          hr: ({ node, ...props }) => (
+            <hr className="my-4 border-gray-600" {...props} />
+          ),
+          // Handle code blocks
+          code: ({ node, inline, ...props }) => (
+            inline ? (
+              <code className="bg-gray-800 text-blue-300 px-1 py-0.5 rounded text-sm" {...props} />
+            ) : (
+              <code className="block bg-gray-800 text-blue-300 p-2 rounded mb-2 text-sm overflow-x-auto" {...props} />
+            )
+          ),
+          // Handle blockquotes
+          blockquote: ({ node, ...props }) => (
+            <blockquote className="border-l-4 border-blue-400 pl-4 italic text-gray-300 mb-3" {...props} />
+          ),
+          // Handle line breaks
+          br: ({ node, ...props }) => (
+            <br className="mb-1" {...props} />
           ),
         }}
       >

@@ -77,43 +77,49 @@ export const getServiceResponse = (serviceTitle, chatData, language) => {
     
     const service = chatData.serviceDescriptions[language][serviceTitle];
     
-    // Handle your complex object structure
-    let responseText = `**${service.title || serviceTitle}**\n\n`;
+    // Build response with rich markdown formatting
+    const sections = [];
     
-    // Add short description
+    // Title section
+    sections.push(`# ${service.title || serviceTitle}`);
+    
+    // Short description
     if (service.shortDescription) {
-      responseText += `${service.shortDescription}\n\n`;
+      sections.push(service.shortDescription);
     }
     
-    // Add key benefits
+    // Key benefits section
     if (service.keyBenefits && service.keyBenefits.length > 0) {
-      responseText += `**Key Benefits:**\n`;
-      service.keyBenefits.forEach(benefit => {
-        responseText += `• ${benefit}\n`;
-      });
-      responseText += '\n';
+      sections.push('## Key Benefits:');
+      sections.push(service.keyBenefits.map(benefit => `- ${benefit}`).join('\n'));
     }
     
-    // Add delivery info
+    // Service details section
+    const details = [];
     if (service.deliveryFormats && service.deliveryFormats.length > 0) {
-      responseText += `**Available as:** ${service.deliveryFormats.join(', ')}\n`;
+      details.push(`**Available as:** ${service.deliveryFormats.join(', ')}`);
     }
-    
     if (service.duration) {
-      responseText += `**Duration:** ${service.duration}\n`;
+      details.push(`**Duration:** ${service.duration}`);
     }
-    
     if (service.targetAudience) {
-      responseText += `**Target Audience:** ${service.targetAudience}\n\n`;
+      details.push(`**Target Audience:** ${service.targetAudience}`);
     }
     
-    // Add prompts for more info
+    if (details.length > 0) {
+      sections.push('## Service Details:');
+      sections.push(details.join('\n\n'));
+    }
+    
+    // Call to action section
     const moreInfoPrompt = chatData.ui?.moreInfo?.[language] || 'Would you like more detailed information?';
     const pricingPrompt = chatData.ui?.pricingInfo?.[language] || 'Would you like pricing information?';
     
-    responseText += `${moreInfoPrompt}\n${pricingPrompt}`;
+    sections.push('---'); // Horizontal rule for separation
+    sections.push(`${moreInfoPrompt}\n\n${pricingPrompt}`);
     
-    return responseText;
+    // Join all sections with double line breaks for proper markdown paragraphs
+    return sections.join('\n\n');
   }
   
   // Fallback
