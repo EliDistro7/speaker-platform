@@ -2,661 +2,667 @@
 
 export const pricingData = {
     en: {
-      // Website Development pricing packages
-      'Website Development': {
+      // Keynote Speaking pricing packages
+      'Keynote Speaking': {
         currency: 'USD',
         packages: [
           {
-            name: "Basic",
-            price: 1200,
-            billingCycle: "one-time",
-            description: "Perfect for small businesses needing a professional online presence",
-            features: [
-              "5-page responsive website",
-              "Mobile-friendly design",
-              "Contact form integration",
-              "Basic SEO setup",
-              "Social media integration",
-              "Google Analytics setup",
-              "1 hour training session"
-            ],
-            popular: false,
-            deliveryTime: "2-3 weeks"
-          },
-          {
-            name: "Standard",
-            price: 2800,
-            billingCycle: "one-time",
-            description: "Comprehensive solution for growing businesses with more complex needs",
-            features: [
-              "10-page responsive website",
-              "Custom design & branding",
-              "Advanced contact forms",
-              "Content management system",
-              "Blog/news section",
-              "Comprehensive SEO setup",
-              "Social media integration",
-              "Google Analytics & Search Console",
-              "Speed optimization",
-              "2 hours of training"
-            ],
-            popular: true,
-            deliveryTime: "3-5 weeks"
-          },
-          {
-            name: "Premium",
-            price: 6000,
-            billingCycle: "one-time",
-            description: "Advanced website solution with custom functionality for established businesses",
-            features: [
-              "15+ page responsive website",
-              "Custom design with unique branding",
-              "Advanced content management system",
-              "Custom functionality development",
-              "E-commerce integration (if needed)",
-              "Advanced SEO optimization",
-              "Website security enhancements",
-              "Performance optimization",
-              "Multi-language support",
-              "4 hours of training"
-            ],
-            popular: false,
-            deliveryTime: "6-8 weeks"
-          }
-        ],
-        customNote: "Custom website development with specific requirements is available. Contact us for a personalized quote."
-      },
-      
-      // E-commerce Solutions pricing
-      'E-commerce Solutions': {
-        currency: 'USD',
-        packages: [
-          {
-            name: "Starter Store",
+            name: "Local Event",
             price: 2500,
-            billingCycle: "one-time",
-            description: "Basic e-commerce solution for businesses just starting online sales",
+            billingCycle: "per event",
+            description: "Perfect for local conferences, corporate events, and community gatherings in Tanzania",
             features: [
-              "Up to 50 products",
-              "Responsive design",
-              "Basic product filtering",
-              "Secure payment integration",
-              "Order management system",
-              "Customer account creation",
-              "Basic inventory management",
-              "Standard shipping options",
-              "2 hours of training"
+              "60-90 minute keynote presentation",
+              "Pre-event consultation call",
+              "Customized content for your audience",
+              "Interactive Q&A session",
+              "Digital handouts for attendees",
+              "Basic AV setup assistance",
+              "Post-event follow-up resources"
             ],
             popular: false,
-            deliveryTime: "3-4 weeks"
+            deliveryTime: "Available within 2-4 weeks",
+            audienceSize: "Up to 300 people"
           },
           {
-            name: "Business Store",
-            price: 4500,
-            billingCycle: "one-time",
-            description: "Comprehensive e-commerce platform for established businesses",
+            name: "Corporate Event",
+            price: 7500,
+            billingCycle: "per event",
+            description: "Comprehensive keynote solution for corporate conferences and leadership summits",
             features: [
-              "Up to 250 products",
-              "Custom design and branding",
-              "Advanced product filtering & search",
-              "Multiple payment gateways",
-              "Discount and coupon system",
-              "Advanced inventory management",
-              "Multiple shipping options",
-              "Customer reviews and ratings",
-              "Wishlist functionality",
-              "Basic CRM integration",
-              "3 hours of training"
+              "90-120 minute keynote with breakout sessions",
+              "Detailed pre-event audience analysis",
+              "Fully customized presentation content",
+              "Interactive workshops integration",
+              "Professional presentation materials",
+              "30-minute meet & greet session",
+              "Team leadership assessment tools",
+              "Post-event action plan templates",
+              "3-month follow-up consultation"
             ],
             popular: true,
-            deliveryTime: "5-7 weeks"
+            deliveryTime: "Book 6-8 weeks in advance",
+            audienceSize: "Up to 1000 people"
           },
           {
-            name: "Enterprise Store",
-            price: 8000,
-            billingCycle: "one-time",
-            description: "Advanced e-commerce solution for large businesses with complex needs",
+            name: "International Event",
+            price: 15000,
+            billingCycle: "per event",
+            description: "Premium keynote experience for international conferences and major corporate events",
             features: [
-              "Unlimited products",
-              "Fully custom design and UX",
-              "Advanced product configurators",
-              "Multiple currencies support",
-              "Advanced CRM integration",
-              "Automated inventory management",
-              "Multi-warehouse support",
-              "Subscription-based products option",
-              "Advanced analytics and reporting",
-              "Multi-language support",
-              "Customer loyalty program",
-              "5 hours of training"
+              "Full-day keynote with multiple sessions",
+              "Comprehensive audience and industry research",
+              "Multi-session presentation series",
+              "Executive roundtable facilitation",
+              "Custom leadership assessment creation",
+              "VIP networking sessions",
+              "Personalized coaching for key executives",
+              "Professional video content creation",
+              "6-month strategic follow-up program",
+              "International travel coordination"
             ],
             popular: false,
-            deliveryTime: "8-12 weeks"
+            deliveryTime: "Book 3-6 months in advance",
+            audienceSize: "1000+ people"
           }
         ],
-        customNote: "For B2B e-commerce platforms, marketplaces, or specialized e-commerce needs, please contact us for a custom quote."
+        customNote: "Travel expenses are additional for events outside Dar es Salaam. Virtual presentations available at 50% of standard rates."
       },
       
-      // Web Maintenance pricing
-      'Web Maintenance': {
+      // Workshop Facilitation pricing
+      'Workshop Facilitation': {
         currency: 'USD',
         packages: [
           {
-            name: "Basic Care",
-            price: 99,
-            billingCycle: "monthly",
-            description: "Essential maintenance for small business websites",
+            name: "Half-Day Workshop",
+            price: 3500,
+            billingCycle: "per workshop",
+            description: "Intensive 4-hour workshop focused on specific leadership or team development topics",
             features: [
-              "Monthly security updates",
-              "Weekly website backups",
-              "Uptime monitoring",
-              "Monthly performance report",
-              "1 hour of content updates per month",
-              "Email support"
+              "4-hour interactive workshop session",
+              "Up to 25 participants",
+              "Customized workshop materials",
+              "Hands-on exercises and case studies",
+              "Individual and group assessments",
+              "Take-home action planning templates",
+              "30-day email follow-up support"
             ],
             popular: false,
-            deliveryTime: "Ongoing"
+            deliveryTime: "2-3 weeks preparation time",
+            maxParticipants: "25 people"
           },
           {
-            name: "Standard Care",
-            price: 249,
-            billingCycle: "monthly",
-            description: "Comprehensive maintenance for business websites with regular updates",
+            name: "Full-Day Intensive",
+            price: 6500,
+            billingCycle: "per workshop",
+            description: "Comprehensive 8-hour workshop with deep-dive into leadership transformation",
             features: [
-              "Weekly security updates",
-              "Daily website backups",
-              "24/7 uptime monitoring",
-              "Monthly in-depth performance report",
-              "3 hours of content updates per month",
-              "Minor design changes",
-              "Plugin and theme updates",
-              "Email and phone support",
-              "48-hour response time"
+              "8-hour comprehensive workshop",
+              "Up to 40 participants",
+              "Multi-module curriculum design",
+              "Interactive simulations and role-plays",
+              "Personal leadership style assessments",
+              "Team building exercises",
+              "Strategic planning sessions",
+              "Comprehensive workbook materials",
+              "90-day implementation support"
             ],
             popular: true,
-            deliveryTime: "Ongoing"
+            deliveryTime: "4-6 weeks preparation time",
+            maxParticipants: "40 people"
           },
           {
-            name: "Premium Care",
-            price: 499,
-            billingCycle: "monthly",
-            description: "Complete maintenance solution for business-critical websites",
+            name: "Multi-Day Program",
+            price: 12000,
+            billingCycle: "per program",
+            description: "Intensive 2-3 day leadership development program with ongoing support",
             features: [
-              "Weekly security updates & monitoring",
-              "Daily website backups",
-              "24/7 uptime monitoring with alerts",
-              "Monthly security scans",
-              "Speed optimization",
-              "5 hours of content updates per month",
-              "Regular design improvements",
-              "Monthly strategy consultation",
-              "Priority email and phone support",
-              "24-hour response time"
+              "2-3 day intensive program",
+              "Up to 30 participants",
+              "Comprehensive leadership curriculum",
+              "360-degree leadership assessments",
+              "Personal development planning",
+              "Peer coaching setup",
+              "Executive presentation skills training",
+              "Strategic thinking workshops",
+              "6-month mentorship program",
+              "Quarterly progress check-ins"
             ],
             popular: false,
-            deliveryTime: "Ongoing"
+            deliveryTime: "6-8 weeks preparation time",
+            maxParticipants: "30 people"
           }
         ],
-        customNote: "We also offer pay-as-you-go maintenance services at $75/hour for clients who need occasional support."
+        customNote: "Workshop content can be customized for specific industries or leadership challenges. Group coaching sessions available as add-ons."
       },
       
-      // SEO Optimization pricing
-      'SEO Optimization': {
+      // Executive Coaching pricing
+      'Executive Coaching': {
         currency: 'USD',
         packages: [
           {
-            name: "SEO Essentials",
-            price: 450,
-            billingCycle: "monthly",
-            minimumTerm: "3 months",
-            description: "Basic SEO services for local businesses looking to improve their online visibility",
+            name: "Foundation Coaching",
+            price: 500,
+            billingCycle: "per session",
+            minimumTerm: "3 sessions",
+            description: "Essential one-on-one coaching for emerging leaders and entrepreneurs",
             features: [
-              "Keyword research (10 keywords)",
-              "Competitor analysis",
-              "On-page SEO optimization",
-              "Google My Business optimization",
-              "Monthly performance report",
-              "Basic local SEO",
-              "Content recommendations"
+              "90-minute individual coaching sessions",
+              "Leadership assessment and gap analysis",
+              "Personal development planning",
+              "Goal setting and accountability tracking",
+              "Email support between sessions",
+              "Resource library access"
             ],
             popular: false,
-            deliveryTime: "Results typically in 3-4 months"
+            deliveryTime: "Sessions scheduled weekly/bi-weekly",
+            sessionDuration: "90 minutes"
           },
           {
-            name: "SEO Professional",
-            price: 900,
-            billingCycle: "monthly",
-            minimumTerm: "3 months",
-            description: "Comprehensive SEO strategy for businesses seeking significant improvement in search rankings",
-            features: [
-              "Advanced keyword research (25 keywords)",
-              "Comprehensive competitor analysis",
-              "Complete on-page SEO optimization",
-              "Content creation (2 articles/month)",
-              "Technical SEO improvements",
-              "Link building (5 quality backlinks/month)",
-              "Local SEO optimization",
-              "Schema markup implementation",
-              "Bi-weekly performance reports"
-            ],
-            popular: true,
-            deliveryTime: "Results typically in 2-3 months"
-          },
-          {
-            name: "SEO Enterprise",
-            price: 1800,
-            billingCycle: "monthly",
+            name: "Executive Development",
+            price: 3500,
+            billingCycle: "monthly package",
             minimumTerm: "6 months",
-            description: "Advanced SEO campaign for businesses targeting competitive markets and keywords",
+            description: "Comprehensive executive coaching program for senior leaders and executives",
             features: [
-              "Comprehensive keyword research (50+ keywords)",
-              "In-depth competitor and market analysis",
-              "Advanced on-page and technical SEO",
-              "Content strategy and creation (4 articles/month)",
-              "Aggressive link building (10+ quality backlinks/month)",
-              "Conversion rate optimization",
-              "International SEO (if applicable)",
-              "Advanced schema markup",
-              "Weekly performance reports",
-              "Monthly strategy consultation"
+              "2 x 90-minute coaching sessions per month",
+              "360-degree leadership assessment",
+              "Comprehensive personal development plan",
+              "Strategic thinking and decision-making support",
+              "Team leadership enhancement",
+              "Crisis management coaching",
+              "Unlimited email and WhatsApp support",
+              "Monthly progress reports",
+              "Resource library and tools access"
+            ],
+            popular: true,
+            deliveryTime: "Weekly or bi-weekly sessions",
+            sessionDuration: "90 minutes each"
+          },
+          {
+            name: "C-Suite Coaching",
+            price: 7500,
+            billingCycle: "monthly package",
+            minimumTerm: "12 months",
+            description: "Premium coaching program for CEOs, Managing Directors, and senior executives",
+            features: [
+              "4 x 90-minute coaching sessions per month",
+              "Comprehensive leadership 360 assessment",
+              "Strategic business coaching",
+              "Board presentation and communication skills",
+              "Organizational culture transformation",
+              "Crisis leadership and change management",
+              "Personal branding and thought leadership",
+              "24/7 emergency coaching support",
+              "Quarterly stakeholder feedback sessions",
+              "Annual leadership retreat planning"
             ],
             popular: false,
-            deliveryTime: "Results typically in 1-3 months"
+            deliveryTime: "Weekly sessions available",
+            sessionDuration: "90 minutes each"
           }
         ],
-        customNote: "SEO results vary based on competition, industry, and current website condition. We offer customized SEO campaigns tailored to specific business goals."
+        customNote: "All coaching packages include initial assessment session. Virtual coaching available worldwide. Group coaching rates available for leadership teams."
       },
       
-      // Social Media Management pricing
-      'Social Media Management': {
+      // Corporate Training pricing
+      'Corporate Training': {
         currency: 'USD',
         packages: [
           {
-            name: "Social Starter",
-            price: 350,
-            billingCycle: "monthly",
-            description: "Basic social media management for small businesses",
+            name: "Team Training",
+            price: 4500,
+            billingCycle: "per training day",
+            description: "Customized training programs for teams and departments",
             features: [
-              "Management of 2 platforms",
-              "12 posts per month",
-              "Basic content calendar",
-              "Community management",
-              "Monthly performance report"
+              "8-hour training program",
+              "Up to 30 participants",
+              "Customized training content",
+              "Interactive learning modules",
+              "Team building activities",
+              "Skills assessment and evaluation",
+              "Training materials and resources",
+              "60-day implementation support"
             ],
             popular: false,
-            platforms: ["Facebook", "Instagram"]
+            deliveryTime: "3-4 weeks preparation",
+            maxParticipants: "30 people"
           },
           {
-            name: "Social Growth",
-            price: 750,
-            billingCycle: "monthly",
-            description: "Comprehensive social media management for established businesses",
+            name: "Department Training",
+            price: 8500,
+            billingCycle: "per program",
+            description: "Comprehensive multi-day training program for entire departments",
             features: [
-              "Management of 3 platforms",
-              "20 posts per month",
-              "Content calendar",
-              "Community management",
-              "Hashtag strategy",
-              "Basic influencer outreach",
-              "2 graphic designs per month",
-              "Bi-weekly performance reports",
-              "Competitor monitoring"
+              "2-day comprehensive training program",
+              "Up to 50 participants",
+              "Multi-level curriculum design",
+              "Leadership and management tracks",
+              "Change management workshops",
+              "Performance improvement planning",
+              "Communication and collaboration tools",
+              "Supervisor coaching techniques",
+              "3-month implementation monitoring"
             ],
             popular: true,
-            platforms: ["Facebook", "Instagram", "Twitter", "LinkedIn"]
+            deliveryTime: "6-8 weeks preparation",
+            maxParticipants: "50 people"
           },
           {
-            name: "Social Domination",
-            price: 1500,
-            billingCycle: "monthly",
-            description: "Advanced social media management for businesses seeking significant growth",
+            name: "Organization-Wide",
+            price: 25000,
+            billingCycle: "per program",
+            description: "Complete organizational transformation program with ongoing support",
             features: [
-              "Management of 4+ platforms",
-              "30+ posts per month",
-              "Strategic content calendar",
-              "Advanced community management",
-              "Comprehensive hashtag strategy",
-              "Influencer collaboration",
-              "5 custom graphic designs per month",
-              "2 short video creations per month",
-              "Weekly performance reports",
-              "Social media advertising management (ads budget not included)",
-              "Crisis management planning"
+              "5-day intensive training program",
+              "Unlimited participants (multiple sessions)",
+              "Organizational culture assessment",
+              "Leadership development at all levels",
+              "Change management implementation",
+              "Performance management systems",
+              "Succession planning workshops",
+              "Train-the-trainer programs",
+              "12-month ongoing support and consulting",
+              "Quarterly progress evaluations"
             ],
             popular: false,
-            platforms: ["Facebook", "Instagram", "Twitter", "LinkedIn", "TikTok", "Pinterest"]
+            deliveryTime: "3-4 months preparation",
+            maxParticipants: "Unlimited (multiple cohorts)"
           }
         ],
-        customNote: "Social media advertising budgets are separate from management fees. We can provide recommendations based on your goals and target audience."
+        customNote: "Corporate training programs are fully customizable. Industry-specific content available for healthcare, finance, manufacturing, and technology sectors."
+      },
+      
+      // Virtual Speaking pricing
+      'Virtual Speaking': {
+        currency: 'USD',
+        packages: [
+          {
+            name: "Virtual Keynote",
+            price: 1500,
+            billingCycle: "per event",
+            description: "Engaging virtual keynote presentation with interactive elements",
+            features: [
+              "60-minute virtual keynote",
+              "Interactive polls and Q&A",
+              "Breakout room facilitation",
+              "Digital presentation materials",
+              "Recording for later use",
+              "Technical setup support"
+            ],
+            popular: false,
+            platform: "Zoom, Teams, or preferred platform"
+          },
+          {
+            name: "Virtual Workshop",
+            price: 2500,
+            billingCycle: "per workshop",
+            description: "Interactive virtual workshop with hands-on activities and group work",
+            features: [
+              "3-4 hour virtual workshop",
+              "Interactive breakout sessions",
+              "Digital collaboration tools",
+              "Virtual whiteboarding activities",
+              "Individual and group exercises",
+              "Follow-up resource packet",
+              "30-day email support"
+            ],
+            popular: true,
+            platform: "Zoom, Teams, or preferred platform"
+          },
+          {
+            name: "Virtual Series",
+            price: 5000,
+            billingCycle: "per series",
+            description: "Multi-session virtual learning series with ongoing engagement",
+            features: [
+              "4-session virtual series (2 hours each)",
+              "Progressive skill building curriculum",
+              "Peer learning and networking",
+              "Weekly assignments and activities",
+              "Group coaching elements",
+              "Comprehensive resource library",
+              "Certificate of completion",
+              "3-month alumni support group"
+            ],
+            popular: false,
+            platform: "Zoom, Teams, or preferred platform"
+          }
+        ],
+        customNote: "All virtual events include technical rehearsal and platform setup support. Time zone coordination available for international audiences."
       }
     },
     sw: {
-      // Website Development pricing packages
-      'Website Development': {
+      // Keynote Speaking pricing packages
+      'Keynote Speaking': {
         currency: 'TZS',
         packages: [
           {
-            name: "Msingi",
-            price: 1200000,
-            billingCycle: "one-time",
-            description: "Inafaa kwa biashara ndogo zinazohitaji uwepo wa kitaalamu mtandaoni",
-            features: [
-              "Tovuti yenye kurasa 5 inayoitikia",
-              "Muundo rafiki wa simu",
-              "Ujumuishaji wa fomu ya mawasiliano",
-              "Usanidi wa msingi wa SEO",
-              "Ujumuishaji wa mitandao ya kijamii",
-              "Usanidi wa Google Analytics",
-              "Kipindi cha mafunzo cha saa 1"
-            ],
-            popular: false,
-            deliveryTime: "Wiki 2-3"
-          },
-          {
-            name: "Kawaida",
-            price: 2800000,
-            billingCycle: "one-time",
-            description: "Suluhisho kamili kwa biashara zinazokua zenye mahitaji zaidi ya kina",
-            features: [
-              "Tovuti yenye kurasa 10 inayoitikia",
-              "Muundo na chapa ya kipekee",
-              "Fomu za mawasiliano za hali ya juu",
-              "Mfumo wa usimamizi wa maudhui",
-              "Sehemu ya blogu/habari",
-              "Usanidi kamili wa SEO",
-              "Ujumuishaji wa mitandao ya kijamii",
-              "Google Analytics na Search Console",
-              "Uboreshaji wa kasi",
-              "Masaa 2 ya mafunzo"
-            ],
-            popular: true,
-            deliveryTime: "Wiki 3-5"
-          },
-          {
-            name: "Premium",
-            price: 6000000,
-            billingCycle: "one-time",
-            description: "Suluhisho la tovuti la hali ya juu na utendaji wa kipekee kwa biashara zilizoimarika",
-            features: [
-              "Tovuti yenye kurasa 15+ inayoitikia",
-              "Muundo wa kipekee na chapa ya kipekee",
-              "Mfumo wa usimamizi wa maudhui wa hali ya juu",
-              "Maendeleo ya utendaji wa kipekee",
-              "Ujumuishaji wa biashara ya mtandaoni (ikihitajika)",
-              "Uboreshaji wa SEO wa hali ya juu",
-              "Uboreshaji wa usalama wa tovuti",
-              "Uboreshaji wa utendaji",
-              "Msaada wa lugha nyingi",
-              "Masaa 4 ya mafunzo"
-            ],
-            popular: false,
-            deliveryTime: "Wiki 6-8"
-          }
-        ],
-        customNote: "Utengenezaji wa tovuti maalum kwa mahitaji maalum unapatikana. Wasiliana nasi kwa nukuu ya kibinafsi."
-      },
-      
-      // E-commerce Solutions pricing
-      'E-commerce Solutions': {
-        currency: 'TZS',
-        packages: [
-          {
-            name: "Duka la Kuanzia",
+            name: "Tukio la Ndani",
             price: 2500000,
-            billingCycle: "one-time",
-            description: "Suluhisho la msingi la biashara mtandaoni kwa biashara zinazoanza mauzo mtandaoni",
+            billingCycle: "kwa tukio",
+            description: "Inafaa kwa mikutano ya ndani, matukio ya makampuni, na mikutano ya jamii Tanzania",
             features: [
-              "Hadi bidhaa 50",
-              "Muundo unaoitikia",
-              "Uchujaji wa bidhaa wa msingi",
-              "Ujumuishaji wa malipo salama",
-              "Mfumo wa usimamizi wa oda",
-              "Uundaji wa akaunti ya mteja",
-              "Usimamizi wa msingi wa mali",
-              "Chaguo za kawaida za usafirishaji",
-              "Masaa 2 ya mafunzo"
+              "Uwasilishaji wa dakika 60-90",
+              "Mazungumzo ya ushauri kabla ya tukio",
+              "Maudhui yaliyobinafsishwa kwa hadhira yako",
+              "Kipindi cha maswali na majibu",
+              "Vinyago vya kidijitali kwa washiriki",
+              "Msaada wa msingi wa usanidi wa AV",
+              "Rasilimali za kufuatilia baada ya tukio"
             ],
             popular: false,
-            deliveryTime: "Wiki 3-4"
+            deliveryTime: "Inapatikana ndani ya wiki 2-4",
+            audienceSize: "Hadi watu 300"
           },
           {
-            name: "Duka la Biashara",
-            price: 4500000,
-            billingCycle: "one-time",
-            description: "Jukwaa kamili la biashara mtandaoni kwa biashara zilizoimarika",
+            name: "Tukio la Kampuni",
+            price: 7500000,
+            billingCycle: "kwa tukio",
+            description: "Suluhisho kamili la uwasilishaji kwa mikutano ya makampuni na mkutano wa uongozi",
             features: [
-              "Hadi bidhaa 250",
-              "Muundo wa kipekee na chapa",
-              "Uchujaji wa bidhaa wa hali ya juu na utafutaji",
-              "Malango mengi ya malipo",
-              "Mfumo wa punguzo na kuponi",
-              "Usimamizi wa mali wa hali ya juu",
-              "Chaguo nyingi za usafirishaji",
-              "Maoni na tathmini za wateja",
-              "Utendaji wa orodha ya matakwa",
-              "Ujumuishaji wa msingi wa CRM",
-              "Masaa 3 ya mafunzo"
+              "Uwasilishaji wa dakika 90-120 na vikao vya vikundi",
+              "Uchambuzi wa kina wa hadhira kabla ya tukio",
+              "Maudhui ya uwasilishaji yaliyobinafsishwa kabisa",
+              "Ujumuishaji wa warsha za kushirikishana",
+              "Nyenzo za uwasilishaji za kitaalamu",
+              "Kipindi cha dakika 30 cha mkutano na salamu",
+              "Zana za tathmini ya uongozi wa timu",
+              "Templeti za mpango wa hatua baada ya tukio",
+              "Ushauri wa kufuatilia wa miezi 3"
             ],
             popular: true,
-            deliveryTime: "Wiki 5-7"
+            deliveryTime: "Hifadhi wiki 6-8 mapema",
+            audienceSize: "Hadi watu 1000"
           },
           {
-            name: "Duka la Kampuni",
-            price: 8000000,
-            billingCycle: "one-time",
-            description: "Suluhisho la hali ya juu la biashara mtandaoni kwa biashara kubwa zenye mahitaji magumu",
+            name: "Tukio la Kimataifa",
+            price: 15000000,
+            billingCycle: "kwa tukio",
+            description: "Uzoefu wa premium wa uwasilishaji kwa mikutano ya kimataifa na matukio makubwa ya makampuni",
             features: [
-              "Bidhaa zisizo na kikomo",
-              "Muundo wa kipekee kabisa na UX",
-              "Visanidi vya bidhaa vya hali ya juu",
-              "Msaada wa fedha nyingi",
-              "Ujumuishaji wa CRM wa hali ya juu",
-              "Usimamizi wa mali wa kiotomatiki",
-              "Msaada wa ghala nyingi",
-              "Chaguo la bidhaa za misingi ya usajili",
-              "Uchambuzi na ripoti za hali ya juu",
-              "Msaada wa lugha nyingi",
-              "Programu ya uaminifu wa mteja",
-              "Masaa 5 ya mafunzo"
+              "Uwasilishaji wa siku nzima na vikao vingi",
+              "Utafiti kamili wa hadhira na sekta",
+              "Mfululizo wa uwasilishaji wa vikao vingi",
+              "Uongozaji wa meza ya mviringo ya wakurugenzi",
+              "Uundaji wa tathmini ya uongozi ya kibinafsi",
+              "Vikao vya uwandani wa VIP",
+              "Mafunzo ya kibinafsi kwa wakurugenzi wakuu",
+              "Uundaji wa maudhui ya video ya kitaalamu",
+              "Programu ya kufuatilia ya kimkakati ya miezi 6",
+              "Uratibu wa safari za kimataifa"
             ],
             popular: false,
-            deliveryTime: "Wiki 8-12"
+            deliveryTime: "Hifadhi miezi 3-6 mapema",
+            audienceSize: "Watu 1000+"
           }
         ],
-        customNote: "Kwa majukwaa ya biashara mtandaoni ya B2B, masoko, au mahitaji maalum ya biashara mtandaoni, tafadhali wasiliana nasi kwa nukuu ya kibinafsi."
+        customNote: "Gharama za safari ni za ziada kwa matukio nje ya Dar es Salaam. Mawasilisho ya mtandaoni yanapatikana kwa 50% ya kiwango cha kawaida."
       },
       
-      // Web Maintenance pricing
-      'Web Maintenance': {
+      // Workshop Facilitation pricing
+      'Workshop Facilitation': {
         currency: 'TZS',
         packages: [
           {
-            name: "Utunzaji wa Msingi",
-            price: 99000,
-            billingCycle: "monthly",
-            description: "Matengenezo muhimu kwa tovuti za biashara ndogo",
+            name: "Warsha ya Nusu Siku",
+            price: 3500000,
+            billingCycle: "kwa warsha",
+            description: "Warsha mkali ya masaa 4 inayolenga mada maalum za uongozi au maendeleo ya timu",
             features: [
-              "Sasisho za usalama za kila mwezi",
-              "Nakala rudufu za tovuti za kila wiki",
-              "Ufuatiliaji wa muda wa juu",
-              "Ripoti ya utendaji ya kila mwezi",
-              "Saa 1 ya sasisho za maudhui kwa mwezi",
-              "Msaada wa barua pepe"
+              "Kipindi cha warsha cha kushirikiana cha masaa 4",
+              "Hadi washiriki 25",
+              "Nyenzo za warsha zilizobinafsishwa",
+              "Mazoezi ya vitendakazi na mifano ya kesi",
+              "Tathmini za kibinafsi na za kikundi",
+              "Templeti za kupanga hatua za kuchukua nyumbani",
+              "Msaada wa kufuatilia wa barua pepe wa siku 30"
             ],
             popular: false,
-            deliveryTime: "Inaendelea"
+            deliveryTime: "Muda wa maandalizi wa wiki 2-3",
+            maxParticipants: "Watu 25"
           },
           {
-            name: "Utunzaji wa Kawaida",
-            price: 249000,
-            billingCycle: "monthly",
-            description: "Matengenezo kamili kwa tovuti za biashara zenye sasisho za mara kwa mara",
+            name: "Mkali wa Siku Nzima",
+            price: 6500000,
+            billingCycle: "kwa warsha",
+            description: "Warsha kamili ya masaa 8 na kuzama kwa kina katika mabadiliko ya uongozi",
             features: [
-              "Sasisho za usalama za kila wiki",
-              "Nakala rudufu za tovuti za kila siku",
-              "Ufuatiliaji wa muda wa juu 24/7",
-              "Ripoti ya kina ya utendaji ya kila mwezi",
-              "Masaa 3 ya sasisho za maudhui kwa mwezi",
-              "Mabadiliko madogo ya muundo",
-              "Sasisho za programu-jalizi na mandhari",
-              "Msaada wa barua pepe na simu",
-              "Muda wa majibu wa saa 48"
+              "Warsha kamili ya masaa 8",
+              "Hadi washiriki 40",
+              "Muundo wa mtaala wa moduli nyingi",
+              "Mchanganyiko wa kushirikishana na mchezaji wa majukumu",
+              "Tathmini za mtindo wa uongozi wa kibinafsi",
+              "Mazoezi ya kujenga timu",
+              "Vikao vya upangaji wa kimkakati",
+              "Nyenzo kamili za kitabu cha kazi",
+              "Msaada wa utekelezaji wa siku 90"
             ],
             popular: true,
-            deliveryTime: "Inaendelea"
+            deliveryTime: "Muda wa maandalizi wa wiki 4-6",
+            maxParticipants: "Watu 40"
           },
           {
-            name: "Utunzaji wa Premium",
-            price: 499000,
-            billingCycle: "monthly",
-            description: "Suluhisho kamili la matengenezo kwa tovuti muhimu za biashara",
+            name: "Programu ya Siku Nyingi",
+            price: 12000000,
+            billingCycle: "kwa programu",
+            description: "Programu mkali ya maendeleo ya uongozi ya siku 2-3 na msaada unaoendelea",
             features: [
-              "Sasisho na ufuatiliaji wa usalama wa kila wiki",
-              "Nakala rudufu za tovuti za kila siku",
-              "Ufuatiliaji wa muda wa juu 24/7 na arifa",
-              "Uchunguzi wa usalama wa kila mwezi",
-              "Uboreshaji wa kasi",
-              "Masaa 5 ya sasisho za maudhui kwa mwezi",
-              "Uboreshaji wa mara kwa mara wa muundo",
-              "Ushauri wa kimkakati wa kila mwezi",
-              "Kipaumbele kwa msaada wa barua pepe na simu",
-              "Muda wa majibu wa saa 24"
+              "Programu mkali ya siku 2-3",
+              "Hadi washiriki 30",
+              "Mtaala kamili wa uongozi",
+              "Tathmini za uongozi za shahada 360",
+              "Upangaji wa maendeleo ya kibinafsi",
+              "Usanidi wa mafunzo ya wenzao",
+              "Mafunzo ya ujuzi wa uwasilishaji wa wakurugenzi",
+              "Warsha za mafikiri ya kimkakati",
+              "Programu ya ushauri wa miezi 6",
+              "Ukaguzi wa maendeleo wa kila robo"
             ],
             popular: false,
-            deliveryTime: "Inaendelea"
+            deliveryTime: "Muda wa maandalizi wa wiki 6-8",
+            maxParticipants: "Watu 30"
           }
         ],
-        customNote: "Tunatoa pia huduma za matengenezo ya kulipa-unapotumia kwa TZS 75,000/saa kwa wateja wanaohitaji msaada wa mara kwa mara."
+        customNote: "Maudhui ya warsha yanaweza kubinafsishwa kwa viwanda mahususi au changamoto za uongozi. Vikao vya mafunzo ya kikundi vinapatikana kama nyongeza."
       },
       
-      // SEO Optimization pricing
-      'SEO Optimization': {
+      // Executive Coaching pricing
+      'Executive Coaching': {
         currency: 'TZS',
         packages: [
           {
-            name: "SEO ya Msingi",
-            price: 450000,
-            billingCycle: "monthly",
-            minimumTerm: "miezi 3",
-            description: "Huduma za msingi za SEO kwa biashara za ndani zinazotafuta kuboresha muonekano wao mtandaoni",
+            name: "Mafunzo ya Misingi",
+            price: 500000,
+            billingCycle: "kwa kipindi",
+            minimumTerm: "vipindi 3",
+            description: "Mafunzo muhimu ya mtu mmoja kwa mmoja kwa viongozi wanaotokea na wajasiriamali",
             features: [
-              "Utafiti wa maneno muhimu (maneno 10)",
-              "Uchambuzi wa washindani",
-              "Uboreshaji wa SEO kwenye kurasa",
-              "Uboreshaji wa Google My Business",
-              "Ripoti ya utendaji ya kila mwezi",
-              "SEO ya ndani ya msingi",
-              "Mapendekezo ya maudhui"
+              "Vikao vya mafunzo ya kibinafsi vya dakika 90",
+              "Tathmini ya uongozi na uchambuzi wa mapengo",
+              "Upangaji wa maendeleo ya kibinafsi",
+              "Kuweka malengo na kufuatilia uwajibikaji",
+              "Msaada wa barua pepe kati ya vikao",
+              "Upatikanaji wa maktaba ya rasilimali"
             ],
             popular: false,
-            deliveryTime: "Matokeo kwa kawaida katika miezi 3-4"
+            deliveryTime: "Vikao vimepangwa kila wiki/wiki mbili",
+            sessionDuration: "Dakika 90"
           },
           {
-            name: "SEO ya Kitaalamu",
-            price: 900000,
-            billingCycle: "monthly",
-            minimumTerm: "miezi 3",
-            description: "Mkakati kamili wa SEO kwa biashara zinazotafuta uboreshaji mkubwa katika nafasi za utafutaji",
-            features: [
-              "Utafiti wa kina wa maneno muhimu (maneno 25)",
-              "Uchambuzi kamili wa washindani",
-              "Uboreshaji kamili wa SEO kwenye kurasa",
-              "Uundaji wa maudhui (makala 2/mwezi)",
-              "Uboreshaji wa kiufundi wa SEO",
-              "Ujenzi wa viungo (viungo vya ubora 5/mwezi)",
-              "Uboreshaji wa SEO ya ndani",
-              "Utekelezaji wa alama za muundo",
-              "Ripoti za utendaji za kila wiki mbili"
-            ],
-            popular: true,
-            deliveryTime: "Matokeo kwa kawaida katika miezi 2-3"
-          },
-          {
-            name: "SEO ya Kampuni",
-            price: 1800000,
-            billingCycle: "monthly",
+            name: "Maendeleo ya Wakurugenzi",
+            price: 3500000,
+            billingCycle: "kifurushi cha kila mwezi",
             minimumTerm: "miezi 6",
-            description: "Kampeni ya SEO ya hali ya juu kwa biashara zinazolenga masoko na maneno muhimu ya ushindani",
+            description: "Programu kamili ya mafunzo ya wakurugenzi kwa viongozi wakuu na wakurugenzi",
             features: [
-              "Utafiti kamili wa maneno muhimu (maneno 50+)",
-              "Uchambuzi wa kina wa washindani na soko",
-              "SEO ya hali ya juu kwenye na nje ya kurasa",
-              "Mkakati na uundaji wa maudhui (makala 4/mwezi)",
-              "Ujenzi mkali wa viungo (viungo vya ubora 10+/mwezi)",
-              "Uboreshaji wa kiwango cha ubadilishaji",
-              "SEO ya kimataifa (inapohitajika)",
-              "Alama za muundo za hali ya juu",
-              "Ripoti za utendaji za kila wiki",
-              "Ushauri wa kimkakati wa kila mwezi"
+              "Vikao 2 x 90 dakika za mafunzo kwa mwezi",
+              "Tathmini ya uongozi ya shahada 360",
+              "Mpango kamili wa maendeleo ya kibinafsi",
+              "Msaada wa mafikiri ya kimkakati na kufanya maamuzi",
+              "Uboreshaji wa uongozi wa timu",
+              "Mafunzo ya usimamizi wa migogoro",
+              "Msaada usio na kikomo wa barua pepe na WhatsApp",
+              "Ripoti za maendeleo za kila mwezi",
+              "Upatikanaji wa maktaba ya rasilimali na zana"
+            ],
+            popular: true,
+            deliveryTime: "Vikao vya kila wiki au wiki mbili",
+            sessionDuration: "Dakika 90 kila kimoja"
+          },
+          {
+            name: "Mafunzo ya C-Suite",
+            price: 7500000,
+            billingCycle: "kifurushi cha kila mwezi",
+            minimumTerm: "miezi 12",
+            description: "Programu ya premium ya mafunzo kwa Wakurugenzi Mkuu, Wadirectors Wasimamizi, na wakurugenzi wakuu",
+            features: [
+              "Vikao 4 x 90 dakika za mafunzo kwa mwezi",
+              "Tathmini kamili ya uongozi ya 360",
+              "Mafunzo ya biashara ya kimkakati",
+              "Ujuzi wa uwasilishaji na mawasiliano ya bodi",
+              "Mabadiliko ya utamaduni wa shirika",
+              "Uongozi wa migogoro na usimamizi wa mabadiliko",
+              "Chapa ya kibinafsi na uongozi wa mafikira",
+              "Msaada wa mafunzo wa dharura wa saa 24/7",
+              "Vikao vya maoni ya wadau vya kila robo",
+              "Upangaji wa mapumziko ya uongozi ya kila mwaka"
             ],
             popular: false,
-            deliveryTime: "Matokeo kwa kawaida katika miezi 1-3"
+            deliveryTime: "Vikao vya kila wiki vinapatikana",
+            sessionDuration: "Dakika 90 kila kimoja"
           }
         ],
-        customNote: "Matokeo ya SEO hutofautiana kulingana na ushindani, sekta, na hali ya sasa ya tovuti. Tunatoa kampeni za SEO zilizobinafsishwa kulingana na malengo maalum ya biashara."
+        customNote: "Vifurushi vyote vya mafunzo vinajumuisha kipindi cha tathmini ya kwanza. Mafunzo ya mtandaoni yanapatikana ulimwenguni. Kiwango cha mafunzo ya kikundi kinapatikana kwa timu za uongozi."
       },
       
-      // Social Media Management pricing
-      'Social Media Management': {
+      // Corporate Training pricing
+      'Corporate Training': {
         currency: 'TZS',
         packages: [
           {
-            name: "Mitandao ya Kuanzia",
-            price: 350000,
-            billingCycle: "monthly",
-            description: "Usimamizi wa msingi wa mitandao ya kijamii kwa biashara ndogo",
+            name: "Mafunzo ya Timu",
+            price: 4500000,
+            billingCycle: "kwa siku ya mafunzo",
+            description: "Mipango ya mafunzo iliyobinafsishwa kwa timu na idara",
             features: [
-              "Usimamizi wa majukwaa 2",
-              "Machapisho 12 kwa mwezi",
-              "Kalenda ya msingi ya maudhui",
-              "Usimamizi wa jumuiya",
-              "Ripoti ya utendaji ya kila mwezi"
+              "Programu ya mafunzo ya masaa 8",
+              "Hadi washiriki 30",
+              "Maudhui ya mafunzo yaliyobinafsishwa",
+              "Moduli za kujifunza za kushirikishana",
+              "Shughuli za kujenga timu",
+              "Tathmini na tathmini ya ujuzi",
+              "Nyenzo na rasilimali za mafunzo",
+              "Msaada wa utekelezaji wa siku 60"
             ],
             popular: false,
-            platforms: ["Facebook", "Instagram"]
+            deliveryTime: "Maandalizi ya wiki 3-4",
+            maxParticipants: "Watu 30"
           },
           {
-            name: "Ukuaji wa Mitandao",
-            price: 750000,
-            billingCycle: "monthly",
-            description: "Usimamizi kamili wa mitandao ya kijamii kwa biashara zilizoimarika",
+            name: "Mafunzo ya Idara",
+            price: 8500000,
+            billingCycle: "kwa programu",
+            description: "Programu kamili ya mafunzo ya siku nyingi kwa idara nzima",
             features: [
-              "Usimamizi wa majukwaa 3",
-              "Machapisho 20 kwa mwezi",
-              "Kalenda ya maudhui",
-              "Usimamizi wa jumuiya",
-              "Mkakati wa hashtag",
-              "Ufikio wa msingi wa waathiri",
-              "Miundo 2 ya grafiki kwa mwezi",
-              "Ripoti za utendaji za kila wiki mbili",
-              "Ufuatiliaji wa washindani"
+              "Programu kamili ya mafunzo ya siku 2",
+              "Hadi washiriki 50",
+              "Muundo wa mtaala wa ngazi nyingi",
+              "Njia za uongozi na usimamizi",
+              "Warsha za usimamizi wa mabadiliko",
+              "Upangaji wa uboreshaji wa utendaji",
+              "Zana za mawasiliano na ushirikiano",
+              "Mbinu za mafunzo za wasimamizi",
+              "Ufuatiliaji wa utekelezaji wa miezi 3"
             ],
             popular: true,
-            platforms: ["Facebook", "Instagram", "Twitter", "LinkedIn"]
+            deliveryTime: "Maandalizi ya wiki 6-8",
+            maxParticipants: "Watu 50"
           },
           {
-            name: "Utawala wa Mitandao",
-            price: 1500000,
-            billingCycle: "monthly",
-            description: "Usimamizi wa hali ya juu wa mitandao ya kijamii kwa biashara zinazotafuta ukuaji mkubwa",
+            name: "Shirika Lote",
+            price: 25000000,
+            billingCycle: "kwa programu",
+            description: "Programu kamili ya mabadiliko ya shirika na msaada unaoendelea",
             features: [
-              "Usimamizi wa majukwaa 4+",
-              "Machapisho 30+ kwa mwezi",
-              "Kalenda ya kimkakati ya maudhui",
-              "Usimamizi wa jumuiya wa hali ya juu",
-              "Mkakati kamili wa hashtag",
-              "Ushirikiano na waathiri",
-              "Miundo 5 ya kipekee ya grafiki kwa mwezi",
-              "Uundaji wa video fupi 2 kwa mwezi",
-              "Ripoti za utendaji za kila wiki",
-              "Usimamizi wa matangazo ya mitandao ya kijamii (bajeti ya matangazo haijajumuishwa)",
-              "Mpango wa usimamizi wa mgogoro"
+              "Programu mkali ya mafunzo ya siku 5",
+              "Washiriki wasio na kikomo (vikao vingi)",
+              "Tathmini ya utamaduni wa shirika",
+              "Maendeleo ya uongozi katika ngazi zote",
+              "Utekelezaji wa usimamizi wa mabadiliko",
+              "Mifumo ya usimamizi wa utendaji",
+              "Warsha za upangaji wa mrithi",
+              "Mipango ya mafunzo ya wafunzi",
+              "Msaada unaoendelea na ushauri wa miezi 12",
+              "Tathmini za maendeleo za kila robo"
             ],
             popular: false,
-            platforms: ["Facebook", "Instagram", "Twitter", "LinkedIn", "TikTok", "Pinterest"]
+            deliveryTime: "Maandalizi ya miezi 3-4",
+            maxParticipants: "Wasio na kikomo (makundi mengi)"
           }
         ],
-        customNote: "Bajeti za matangazo ya mitandao ya kijamii ni tofauti na ada za usimamizi. Tunaweza kutoa mapendekezo kulingana na malengo yako na walengwa."
+        customNote: "Mipango ya mafunzo ya makampuni inaweza kubinafsishwa kabisa. Maudhui maalum ya sekta yanapatikana kwa huduma za afya, fedha, uzalishaji, na sekta za teknolojia."
+      },
+      
+      // Virtual Speaking pricing
+      'Virtual Speaking': {
+        currency: 'TZS',
+        packages: [
+          {
+            name: "Uwasilishaji Mtandaoni",
+            price: 1500000,
+            billingCycle: "kwa tukio",
+            description: "Uwasilishaji wa mtandaoni wa kuvutia na vipengele vya kushirikishana",
+            features: [
+              "Uwasilishaji wa mtandaoni wa dakika 60",
+              "Kura za kushirikishana na maswali na majibu",
+              "Uongozaji wa chumba cha mapumziko",
+              "Nyenzo za uwasilishaji za kidijitali",
+              "Urekodi kwa matumizi ya baadaye",
+              "Msaada wa usanidi wa kiufundi"
+            ],
+            popular: false,
+            platform: "Zoom, Teams, au jukwaa linalotaka"
+          },
+          {
+            name: "Warsha ya Mtandaoni",
+            price: 2500000,
+            billingCycle: "kwa warsha",
+            description: "Warsha ya mtandaoni ya kushirikishana na shughuli za vitendakazi na kazi ya kikundi",
+            features: [
+              "Warsha ya mtandaoni ya masaa 3-4",
+              "Vikao vya kushirikishana vya mapumziko",
+              "Zana za ushirikiano za kidijitali",
+              "Shughuli za ubao mweupe wa mtandaoni",
+              "Mazoezi ya kibinafsi na ya kikundi",
+              "Kifurushi cha rasilimali za kufuatilia",
+              "Msaada wa barua pepe wa siku 30"
+            ],
+            popular: true,
+            platform: "Zoom, Teams, au jukwaa linalotaka"
+          },
+          {
+            name: "Mfululizo wa Mtandaoni",
+            price: 5000000,
+            billingCycle: "kwa mfululizo",
+            description: "Mfululizo wa kujifunza wa mtandaoni wa vikao vingi na ushirikiano unaoendelea",
+            features: [
+              "Mfululizo wa mtandaoni wa vikao 4 (masaa 2 kila kimoja)",
+              "Mtaala wa kujenga ujuzi wa kuhakikisha maendeleo",
+              "Kujifunza kwa wenzao na uwandani",
+              "Kazi za kila wiki na shughuli",
+              "Vipengele vya mafunzo ya kikundi",
+              "Maktaba kamili ya rasilimali",
+              "Cheti cha kukamilisha",
+              "Kikundi cha msaada wa waliohitimu wa miezi 3"
+            ],
+            popular: false,
+            platform: "Zoom, Teams, au jukwaa linalotaka"
+          }
+        ],
+        customNote: "Matukio yote ya mtandaoni yanajumuisha msaada wa mchezo wa kiufundi na usanidi wa jukwaa. Uratibu wa ukanda wa saa unapatikana kwa hadhira za kimataifa."
       }
     }
 };
+// This data structure provides a comprehensive overview of pricing packages for various services offered by the company.
+// Each service category includes multiple packages with detailed features, pricing, and delivery information.

@@ -4,9 +4,20 @@
 import { useState, useEffect, useRef } from 'react';
 import { Sparkles, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useLanguage } from '@/context/LanguageContext';
-import { detectLanguage } from '@/utils/chatBotUtils';
-import { chatbotData } from '@/data/chatBotData';
+import { useLanguage } from '@/contexts/language';
+import { chatbotData } from '@/data/chat/index';
+
+// Import all utility functions from chatBotUtils
+import {
+  detectLanguage,
+  processUserMessage,
+  findMatchingService,
+  getServiceResponse,
+  findFaqMatch,
+  isAskingForContact,
+  getContactResponse,
+  generateSuggestions
+} from '@/utils/chatBotUtils';
 
 // Component imports
 import ChatHeader from './ChatHeader';
@@ -19,7 +30,7 @@ import FloatingButton from './FloatingButton';
 import { chatContainerVariants } from './animations';
 
 export default function ChatBot() {
-  const { language } = useLanguage();
+  const { language, setLanguage } = useLanguage(); // Add setLanguage if you want to auto-switch
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -42,7 +53,6 @@ export default function ChatBot() {
   // Auto-scroll to the latest message
   useEffect(() => {
     if (chatEndRef.current && chatScrollRef.current) {
-      // Use a small timeout to ensure the DOM has updated
       setTimeout(() => {
         chatEndRef.current.scrollIntoView({ 
           behavior: 'smooth',
@@ -79,18 +89,31 @@ export default function ChatBot() {
     if (!message.trim()) return;
     
     const userMessage = message.trim();
-   
-    // Detect language from user message
+    
+    // Use detectLanguage utility to detect language from user message
     const detectedLang = detectLanguage(userMessage, null, language);
     
-    // Add user message
+    // Add user message with detected language
     setChatMessages(prev => [...prev, { 
       role: 'user', 
       content: userMessage,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      language: detectedLang // Store detected language with the message
     }]);
+    
     setMessage('');
     setIsTyping(true);
+    
+    // Optional: Auto-switch language if user consistently uses a different language
+    const userMessagesInDetectedLang = chatMessages.filter(
+      msg => msg.role === 'user' && msg.language === detectedLang
+    ).length;
+    
+    if (detectedLang !== language && userMessagesInDetectedLang >= 2) {
+      console.log(`User consistently using ${detectedLang}, consider switching language`);
+      // Uncomment the line below if you want to auto-switch language
+      // setLanguage(detectedLang);
+    }
     
     // Scroll to bottom immediately after sending message
     setTimeout(() => {
@@ -99,33 +122,32 @@ export default function ChatBot() {
       }
     }, 50);
     
-    // Process message and generate response using imported utility
-    import('@/utils/chatBotUtils').then(({ processUserMessage }) => {
-      setTimeout(() => {
-        const responseData = processUserMessage(userMessage, chatbotData, detectedLang);
-        
-        setChatMessages(prev => [...prev, { 
-          role: 'bot', 
-          content: responseData.text,
-          timestamp: new Date().toISOString()
-        }]);
-        
-        // Update suggestions and active service
-        setSuggestions(responseData.suggestions || []);
-        
-        // Try to identify service from response
-        if (responseData.text.startsWith('**')) {
-          const serviceTitle = responseData.text.split('\n')[0].replace(/\*\*/g, '');
-          if (chatbotData.serviceDescriptions[detectedLang]?.[serviceTitle]) {
-            setActiveService(serviceTitle);
-          }
-        } else {
-          setActiveService(null);
+    // Process message and generate response using utility function
+    setTimeout(() => {
+      const responseData = processUserMessage(userMessage, chatbotData, detectedLang);
+      
+      setChatMessages(prev => [...prev, { 
+        role: 'bot', 
+        content: responseData.text,
+        timestamp: new Date().toISOString(),
+        language: detectedLang // Bot responds in same language
+      }]);
+      
+      // Update suggestions using generateSuggestions utility
+      setSuggestions(responseData.suggestions || []);
+      
+      // Try to identify service from response
+      if (responseData.text.startsWith('**')) {
+        const serviceTitle = responseData.text.split('\n')[0].replace(/\*\*/g, '');
+        if (chatbotData.serviceDescriptions[detectedLang]?.[serviceTitle]) {
+          setActiveService(serviceTitle);
         }
-        
-        setIsTyping(false);
-      }, 1500);
-    });
+      } else {
+        setActiveService(null);
+      }
+      
+      setIsTyping(false);
+    }, 1500);
   };
 
   const handleQuickPrompt = (prompt) => {
@@ -134,22 +156,55 @@ export default function ChatBot() {
     setTimeout(() => handleMessageSend(), 300);
   };
 
+  // Additional utility function for manual service lookup
+  const handleServiceLookup = (serviceName) => {
+    const matchedService = findMatchingService(serviceName, chatbotData.serviceKeywords, language);
+    if (matchedService) {
+      const serviceResponse = getServiceResponse(matchedService, chatbotData, language);
+      setChatMessages(prev => [...prev, { 
+        role: 'bot', 
+        content: serviceResponse,
+        timestamp: new Date().toISOString()
+      }]);
+      setActiveService(matchedService);
+      setSuggestions(generateSuggestions(matchedService, chatbotData, language));
+    }
+  };
+
+  // Additional utility function for FAQ lookup
+  const handleFaqLookup = (question) => {
+    const faqAnswer = findFaqMatch(question, chatbotData.faqs, language);
+    if (faqAnswer) {
+      setChatMessages(prev => [...prev, { 
+        role: 'bot', 
+        content: faqAnswer,
+        timestamp: new Date().toISOString()
+      }]);
+    }
+  };
+
+  // Contact information handler
+  const handleContactRequest = () => {
+    const contactResponse = getContactResponse(chatbotData.contactInfo, language);
+    setChatMessages(prev => [...prev, { 
+      role: 'bot', 
+      content: contactResponse,
+      timestamp: new Date().toISOString()
+    }]);
+  };
+
   // Use useState to track if we're on a small screen
   const [isSmallScreen, setIsSmallScreen] = useState(false);
 
   // Update screen size state when window resizes
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsSmallScreen(window.innerWidth < 640); // sm breakpoint in Tailwind
+      setIsSmallScreen(window.innerWidth < 640);
     };
     
-    // Check on mount
     checkScreenSize();
-    
-    // Add resize listener
     window.addEventListener('resize', checkScreenSize);
     
-    // Cleanup
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
   
@@ -211,10 +266,10 @@ export default function ChatBot() {
                 placeholder={chatbotData.ui.inputPlaceholder[language]}
               />
               
-              {/* Contact info button */}
+              {/* Contact info button using utility function */}
               <div className="flex justify-center pt-1">
                 <motion.button
-                  onClick={() => handleQuickPrompt(chatbotData.ui.contactUs[language])}
+                  onClick={handleContactRequest}
                   className="text-xs text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
