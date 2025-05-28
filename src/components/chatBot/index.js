@@ -17,7 +17,7 @@ import {
   isAskingForContact,
   getContactResponse,
   generateSuggestions
-} from '@/utils/chatBotUtils';
+} from '@/utils/ChatBotUtils';
 
 // Component imports
 import ChatHeader from './ChatHeader';
