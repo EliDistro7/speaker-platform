@@ -1,5 +1,8 @@
 // app/utils/chatbotUtils.js
 
+
+// app/utils/chatbotUtils.js
+
 /**
  * Find matching service based on user message
  * @param {string} message - User message
@@ -8,6 +11,11 @@
  * @returns {string|null} - Matching service title or null if no match
  */
 export const findMatchingService = (message, serviceKeywords, language) => {
+  if (!message || !serviceKeywords || !serviceKeywords[language]) {
+    console.log('Missing parameters in findMatchingService:', { message, serviceKeywords, language });
+    return null;
+  }
+
   const lowerMsg = message.toLowerCase();
   
   // Sort service titles by keyword length (descending) to prioritize more specific matches
@@ -30,6 +38,7 @@ export const findMatchingService = (message, serviceKeywords, language) => {
       // Check for exact matches (as whole words)
       const regex = new RegExp(`\\b${keyword}\\b`, 'i');
       if (regex.test(lowerMsg)) {
+        console.log('Found exact match:', { serviceTitle, keyword });
         return serviceTitle;
       }
     }
@@ -39,6 +48,7 @@ export const findMatchingService = (message, serviceKeywords, language) => {
   for (const serviceTitle of sortedServiceTitles) {
     const keywords = serviceKeywords[language][serviceTitle];
     if (keywords.some(keyword => lowerMsg.includes(keyword.toLowerCase()))) {
+      console.log('Found partial match:', { serviceTitle });
       return serviceTitle;
     }
   }
@@ -54,20 +64,60 @@ export const findMatchingService = (message, serviceKeywords, language) => {
  * @returns {string} - Response message
  */
 export const getServiceResponse = (serviceTitle, chatData, language) => {
-  // Check if we have a detailed description for this service
+  console.log('getServiceResponse called with:', { serviceTitle, language });
+  
+  if (!serviceTitle || !chatData || !language) {
+    console.error('Missing required parameters:', { serviceTitle, chatData, language });
+    return chatData?.defaultResponse?.[language] || 'Sorry, I could not process your request.';
+  }
+
   if (chatData.serviceDescriptions && 
       chatData.serviceDescriptions[language] && 
       chatData.serviceDescriptions[language][serviceTitle]) {
     
-    const description = chatData.serviceDescriptions[language][serviceTitle];
-    const moreInfoPrompt = chatData.ui.moreInfo[language];
-    const pricingPrompt = chatData.ui.pricingInfo[language];
+    const service = chatData.serviceDescriptions[language][serviceTitle];
     
-    return `**${serviceTitle}**\n\n${description}\n\n${moreInfoPrompt}\n${pricingPrompt}`;
+    // Handle your complex object structure
+    let responseText = `**${service.title || serviceTitle}**\n\n`;
+    
+    // Add short description
+    if (service.shortDescription) {
+      responseText += `${service.shortDescription}\n\n`;
+    }
+    
+    // Add key benefits
+    if (service.keyBenefits && service.keyBenefits.length > 0) {
+      responseText += `**Key Benefits:**\n`;
+      service.keyBenefits.forEach(benefit => {
+        responseText += `• ${benefit}\n`;
+      });
+      responseText += '\n';
+    }
+    
+    // Add delivery info
+    if (service.deliveryFormats && service.deliveryFormats.length > 0) {
+      responseText += `**Available as:** ${service.deliveryFormats.join(', ')}\n`;
+    }
+    
+    if (service.duration) {
+      responseText += `**Duration:** ${service.duration}\n`;
+    }
+    
+    if (service.targetAudience) {
+      responseText += `**Target Audience:** ${service.targetAudience}\n\n`;
+    }
+    
+    // Add prompts for more info
+    const moreInfoPrompt = chatData.ui?.moreInfo?.[language] || 'Would you like more detailed information?';
+    const pricingPrompt = chatData.ui?.pricingInfo?.[language] || 'Would you like pricing information?';
+    
+    responseText += `${moreInfoPrompt}\n${pricingPrompt}`;
+    
+    return responseText;
   }
   
-  // Fallback to default response if no description is found
-  return chatData.defaultResponse[language];
+  // Fallback
+  return chatData.defaultResponse?.[language] || 'I can help you with that. Please let me know what specific information you need.';
 };
 
 /**
@@ -78,12 +128,17 @@ export const getServiceResponse = (serviceTitle, chatData, language) => {
  * @returns {string|null} - FAQ answer or null if no match
  */
 export const findFaqMatch = (message, faqs, language) => {
-  if (!faqs || !faqs[language]) return null;
+  if (!faqs || !faqs[language] || !Array.isArray(faqs[language])) {
+    console.log('No FAQ data available for language:', language);
+    return null;
+  }
   
   const lowerMsg = message.toLowerCase();
   
   // Look for questions that contain keywords from the user's message
   const relevantFaqs = faqs[language].filter(faq => {
+    if (!faq.question || !faq.answer) return false;
+    
     const questionWords = faq.question.toLowerCase().split(/\s+/);
     // Return true if at least 2 significant words from the question appear in the message
     const significantMatches = questionWords
@@ -109,6 +164,8 @@ export const findFaqMatch = (message, faqs, language) => {
  * @returns {boolean} - True if asking for contact info
  */
 export const isAskingForContact = (message, language) => {
+  if (!message) return false;
+  
   const lowerMsg = message.toLowerCase();
   
   const contactKeywords = {
@@ -116,7 +173,8 @@ export const isAskingForContact = (message, language) => {
     sw: ['wasiliana', 'barua pepe', 'simu', 'piga', 'fikia', 'anwani', 'mahali', 'saa']
   };
   
-  return contactKeywords[language].some(keyword => lowerMsg.includes(keyword));
+  const keywords = contactKeywords[language] || contactKeywords.en;
+  return keywords.some(keyword => lowerMsg.includes(keyword));
 };
 
 /**
@@ -126,22 +184,26 @@ export const isAskingForContact = (message, language) => {
  * @returns {string} - Formatted contact info
  */
 export const getContactResponse = (contactInfo, language) => {
+  if (!contactInfo || !contactInfo[language]) {
+    return 'Contact information is currently unavailable.';
+  }
+
   const info = contactInfo[language];
   
   return `**Contact Information:**\n\n` +
-    `📧 Email: ${info.email}\n` +
-    `📞 Phone: ${info.phone}\n` +
-    `📍 Address: ${info.address}\n` +
-    `🕓 Business Hours: ${info.hours}`;
+    `📧 Email: ${info.email || 'N/A'}\n` +
+    `📞 Phone: ${info.phone || 'N/A'}\n` +
+    `📍 Address: ${info.address || 'N/A'}\n` +
+    `🕓 Business Hours: ${info.hours || 'N/A'}`;
 };
 
 /**
  * Detect language from user message
  * @param {string} message - User message
  * @param {object} langKeywords - Language detection keywords
+ * @param {string} currentLanguage - Current language (fallback)
  * @returns {string} - Detected language code (default: 'en')
  */
-// 1. Enhanced detectLanguage function with more languages
 export const detectLanguage = (message, langKeywords = null, currentLanguage = 'en') => {
   if (!message || message.trim() === '') return currentLanguage;
   
@@ -151,7 +213,6 @@ export const detectLanguage = (message, langKeywords = null, currentLanguage = '
          'kuhusu', 'huduma', 'bei', 'gani', 'tovuti', 'msaada', 'wasiliana'],
     fr: ['bonjour', 'merci', 'comment', 'ça va', 'salut', 'au revoir', 'oui', 'non'],
     es: ['hola', 'gracias', 'cómo', 'buenos días', 'buenas tardes', 'sí', 'no', 'por favor'],
-    // Add more languages as needed
   };
   
   const lowerMsg = message.toLowerCase();
@@ -166,6 +227,100 @@ export const detectLanguage = (message, langKeywords = null, currentLanguage = '
   // Default to current language
   return currentLanguage;
 };
+
+/**
+ * Generate suggestions based on user interaction context
+ * @param {string} serviceTitle - Current service being discussed
+ * @param {object} chatData - Chatbot data
+ * @param {string} language - Current language
+ * @returns {Array} - List of suggestion prompts
+ */
+export const generateSuggestions = (serviceTitle, chatData, language) => {
+  // If discussing a specific service, offer related questions
+  if (serviceTitle && chatData.ui) {
+    const pricingInfo = chatData.ui.pricingInfo?.[language] || 'What are the prices for';
+    
+    return [
+      `${pricingInfo} ${serviceTitle}?`,
+      `What does ${serviceTitle} include?`,
+      `Do you have examples of ${serviceTitle}?`,
+      `How long does ${serviceTitle} take?`
+    ];
+  }
+  
+  // Otherwise return default prompts
+  return chatData.prompts?.[language] || [];
+};
+
+/**
+ * Process user message and generate appropriate response
+ * @param {string} message - User message
+ * @param {object} chatData - Chatbot data
+ * @param {string} language - Current language
+ * @returns {object} - Response object with text and suggestions
+ */
+export const processUserMessage = (message, chatData, language) => {
+  console.log('Processing message:', { message, language });
+  
+  // If language is not specified, detect it
+  const detectedLang = language || detectLanguage(message);
+  
+  // Validate chatData structure
+  if (!chatData) {
+    console.error('ChatData is missing');
+    return {
+      text: 'Sorry, I am currently unavailable. Please try again later.',
+      suggestions: []
+    };
+  }
+  
+  // Check for contact information request
+  if (isAskingForContact(message, detectedLang)) {
+    console.log('Contact request detected');
+    return {
+      text: getContactResponse(chatData.contactInfo, detectedLang),
+      suggestions: generateSuggestions(null, chatData, detectedLang)
+    };
+  }
+  
+  // Check for FAQ match
+  const faqMatch = findFaqMatch(message, chatData.faqs, detectedLang);
+  if (faqMatch) {
+    console.log('FAQ match found');
+    return {
+      text: faqMatch,
+      suggestions: generateSuggestions(null, chatData, detectedLang)
+    };
+  }
+  
+  // Check for service match
+  const serviceMatch = findMatchingService(message, chatData.serviceKeywords, detectedLang);
+  if (serviceMatch) {
+    console.log('Service match found:', serviceMatch);
+    return {
+      text: getServiceResponse(serviceMatch, chatData, detectedLang),
+      suggestions: generateSuggestions(serviceMatch, chatData, detectedLang)
+    };
+  }
+  
+  // Default response when no specific matches found  
+  console.log('Using default response');
+  return {
+    text: chatData.defaultResponse?.[detectedLang] || 'How can I help you today?',
+    suggestions: chatData.prompts?.[detectedLang] || []
+  };
+};
+
+
+
+
+
+
+
+
+
+
+
 
 // 2. Updated usage in ChatBot component
 const handleMessageSend = () => {
@@ -224,68 +379,5 @@ const handleMessageSend = () => {
   }, 1500);
 };
 
-/**
- * Generate suggestions based on user interaction context
- * @param {string} serviceTitle - Current service being discussed
- * @param {object} chatData - Chatbot data
- * @param {string} language - Current language
- * @returns {Array} - List of suggestion prompts
- */
-export const generateSuggestions = (serviceTitle, chatData, language) => {
-  // If discussing a specific service, offer related questions
-  if (serviceTitle) {
-    return [
-      `${chatData.ui.pricingInfo[language]} ${serviceTitle}?`,
-      `What does ${serviceTitle} include?`,
-      `Do you have examples of ${serviceTitle}?`,
-      `How long does ${serviceTitle} take?`
-    ];
-  }
-  
-  // Otherwise return default prompts
-  return chatData.prompts[language];
-};
 
-/**
- * Process user message and generate appropriate response
- * @param {string} message - User message
- * @param {object} chatData - Chatbot data
- * @param {string} language - Current language
- * @returns {object} - Response object with text and suggestions
- */
-export const processUserMessage = (message, chatData, language) => {
-  // If language is not specified, detect it
-  const detectedLang = language || detectLanguage(message);
-  
-  // Check for contact information request
-  if (isAskingForContact(message, detectedLang)) {
-    return {
-      text: getContactResponse(chatData.contactInfo, detectedLang),
-      suggestions: generateSuggestions(null, chatData, detectedLang)
-    };
-  }
-  
-  // Check for FAQ match
-  const faqMatch = findFaqMatch(message, chatData.faqs, detectedLang);
-  if (faqMatch) {
-    return {
-      text: faqMatch,
-      suggestions: generateSuggestions(null, chatData, detectedLang)
-    };
-  }
-  
-  // Check for service match
-  const serviceMatch = findMatchingService(message, chatData.serviceKeywords, detectedLang);
-  if (serviceMatch) {
-    return {
-      text: getServiceResponse(serviceMatch, chatData, detectedLang),
-      suggestions: generateSuggestions(serviceMatch, chatData, detectedLang)
-    };
-  }
-  
-  // Default response when no specific matches found
-  return {
-    text: chatData.defaultResponse[detectedLang],
-    suggestions: chatData.prompts[detectedLang]
-  };
-};
+
