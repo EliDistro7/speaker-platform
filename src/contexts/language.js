@@ -6,7 +6,10 @@ import Cookies from 'js-cookie'
 
 const LanguageContext = createContext({
   language: 'sw',
-  setLanguage: () => {}
+  setLanguage: () => {},
+  toggleLanguage: () => {},
+  isEnglish: false,
+  isSwahili: true
 })
 
 export function LanguageProvider({ children }) {
@@ -19,17 +22,41 @@ export function LanguageProvider({ children }) {
   }, [])
 
   const updateLanguage = (lang) => {
-    Cookies.set('lang', lang, { expires: 365, path: '/' })
-    setLanguage(lang)
+    if (lang === 'en' || lang === 'sw') {
+      Cookies.set('lang', lang, { expires: 365, path: '/' })
+      setLanguage(lang)
+    }
+  }
+
+  // Utility function to toggle between languages
+  const toggleLanguage = () => {
+    const newLang = language === 'en' ? 'sw' : 'en'
+    updateLanguage(newLang)
+  }
+
+  // Utility getters for easier conditionals
+  const isEnglish = language === 'en'
+  const isSwahili = language === 'sw'
+
+  const contextValue = {
+    language,
+    setLanguage: updateLanguage,
+    toggleLanguage,
+    isEnglish,
+    isSwahili
   }
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage: updateLanguage }}>
+    <LanguageContext.Provider value={contextValue}>
       {children}
     </LanguageContext.Provider>
   )
 }
 
 export function useLanguage() {
-  return useContext(LanguageContext)
+  const context = useContext(LanguageContext)
+  if (!context) {
+    throw new Error('useLanguage must be used within a LanguageProvider')
+  }
+  return context
 }
