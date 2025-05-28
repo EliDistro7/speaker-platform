@@ -23,6 +23,7 @@ const translations = {
 };
 
 export const TicketCard = ({ ticket, onDownload }) => {
+  console.log('TicketCard data:', ticket);
   const { language } = useLanguage();
   const t = translations[language];
 
@@ -180,7 +181,7 @@ export const TicketCard = ({ ticket, onDownload }) => {
             variants={contentVariants}
             transition={{ delay: 0.4 }}
           >
-            <QRCodeDisplay data={ticket.qrCode} />
+            <QRCodeDisplay data={ticket} />
           </motion.div>
         </div>
         
