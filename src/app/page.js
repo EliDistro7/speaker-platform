@@ -238,7 +238,7 @@ const Main = () => {
         {/* Profile View */}
         {currentView === 'profile' && (
           <div className="max-w-7xl mx-auto px-2 sm:px-2 lg:px-8 py-8">
-            <div className="space-y-8">
+          
               {/* Profile Header Card */}
             
                 <div className="p-4">
@@ -246,14 +246,14 @@ const Main = () => {
                   <div className="grid md:grid-cols-2 gap-8 mt-8 p-2">
                     <ContactInfo speaker={speaker} />
                     <SpecialtiesList specialties={speaker.specialties} />
-                  </div>
+                  
                 </div>
             
               
               {/* Testimonials Section */}
-              <div className="  rounded-3xl p-4">
+           
                 <TestimonialsSection testimonials={speaker.testimonials} />
-              </div>
+             
             </div>
           </div>
         )}
@@ -261,22 +261,22 @@ const Main = () => {
         {/* Events View */}
         {currentView === 'events' && (
           <div className="max-w-7xl mx-auto px-2 sm:px-2 lg:px-8 py-8">
-            <div className=" rounded-3xl   p-8">
+          
               <EventsList events={events} onRegister={setSelectedEvent} />
-            </div>
+        
           </div>
         )}
         
         {/* Tickets View */}
         {currentView === 'tickets' && (
           <div className="max-w-7xl mx-auto px-2 sm:px-2 lg:px-8 py-8">
-            <div className="rounded-3xl   p-8">
+           
               <TicketsList 
                 tickets={tickets}
                 onDownload={(ticket) => alert(`${t.downloadTicket}: ${ticket.id}`)}
                 onBrowseEvents={() => setCurrentView('events')}
               />
-            </div>
+         
           </div>
         )}
 
