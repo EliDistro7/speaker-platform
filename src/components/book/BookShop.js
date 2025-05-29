@@ -115,7 +115,7 @@ export const BooksShop = ({ onCartUpdate }) => { // Add onCartUpdate prop
 
   // Rest of your component remains the same...
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br ">
       {/* Toast Notification */}
       {showToast && (
         <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg animate-bounce">
@@ -149,8 +149,7 @@ export const BooksShop = ({ onCartUpdate }) => { // Add onCartUpdate prop
             </button>
           </div>
 
-          {/* Enhanced View Mode Tabs */}
-          <div className="flex flex-wrap gap-2 mt-6 mb-4">
+          {/* Enhanced View Mode Tabs      <div className="flex flex-wrap gap-2 mt-6 mb-4">
             {[
               { key: 'all', label: t.allCategories, icon: BookOpen },
               { key: 'featured', label: t.featuredBooks, icon: Star },
@@ -170,10 +169,10 @@ export const BooksShop = ({ onCartUpdate }) => { // Add onCartUpdate prop
                 {label}
               </button>
             ))}
-          </div>
+          </div> */}
+     
 
-          {/* Enhanced Search and Filter */}
-          <div className="flex flex-col md:flex-row gap-4">
+          {/* Enhanced Search and Filter     <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-neutral-400 h-5 w-5" />
               <input
@@ -198,7 +197,8 @@ export const BooksShop = ({ onCartUpdate }) => { // Add onCartUpdate prop
                 ))}
               </select>
             </div>
-          </div>
+          </div> */}
+      
         </div>
       </div>
 

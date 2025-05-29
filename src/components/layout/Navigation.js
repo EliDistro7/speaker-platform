@@ -85,6 +85,7 @@ export const Navigation = ({
         )}
       </AnimatePresence>
 
+
       <nav className="sticky top-0 z-50   border-b border-neutral-200/60 shadow-sm">
         {/* Desktop Navigation */}
         <div className="hidden md:block">
