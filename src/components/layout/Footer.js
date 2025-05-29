@@ -11,6 +11,7 @@ import {
   Phone,
   ExternalLink
 } from 'lucide-react';
+import { useLanguage } from '@/contexts/language';
 
 const SocialMediaFooter = ({ 
   speaker = {
@@ -25,9 +26,11 @@ const SocialMediaFooter = ({
       email: "info@jamesmwangamba.com",
       phone: "+255 617 833 806"
     }
-  },
-  language = 'en'
+  }
 }) => {
+  // Use the language hook to get current language
+  const { language } = useLanguage();
+
   const translations = {
     en: {
       followUs: "Follow Us",
