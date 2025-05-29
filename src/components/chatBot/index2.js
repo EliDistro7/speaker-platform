@@ -46,6 +46,22 @@ import {
   getDetectionSummary
 } from './utils/serviceDetector';
 
+
+// 1. ADD NEW IMPORTS (add to existing imports section)
+import {
+  saveConversationState,
+  restoreConversationState,
+  clearConversationState,
+  createFreshConversationState,
+  addMessageToConversation,
+  getConversationStats,
+  detectConversationPatterns,
+  pruneConversation,
+  exportConversation
+} from './utils/conversationManager';
+
+
+
 // Component imports
 import ChatHeader from './ChatHeader';
 import ChatMessages from './ChatMessages';
@@ -63,6 +79,11 @@ export default function ChatBot() {
   const [suggestions, setSuggestions] = useState([]);
   const [activeService, setActiveService] = useState(null);
   const [isClosing, setIsClosing] = useState(false);
+
+  // 2. ADD NEW STATE VARIABLES (add to existing useState declarations)
+const [conversationStats, setConversationStats] = useState({});
+const [conversationPatterns, setConversationPatterns] = useState({});
+const [maxMessages] = useState(50); // Configurable message limit
   
   // Enhanced service context using utility functions
   const [serviceContext, setServiceContext] = useState(() => createFreshServiceContext());
@@ -77,17 +98,35 @@ export default function ChatBot() {
   const chatScrollRef = useRef(null);
 
   // Initialize chat messages when component mounts or language changes
-  useEffect(() => {
-    setChatMessages([
-      { role: 'bot', content: chatbotData.welcome[language] }
-    ]);
-    setSuggestions(chatbotData.prompts[language]);
-    // Reset service context when language changes
-    setServiceContext(createFreshServiceContext());
-    // **NEW: Reset detection history when language changes**
-    setDetectionHistory([]);
-    setCurrentDetectionResult(null);
-  }, [language]);
+// 3. REPLACE EXISTING useEffect FOR INITIALIZATION
+useEffect(() => {
+  // Try to restore conversation first
+  const restoredState = restoreConversationState(language);
+  
+  if (restoredState) {
+    setChatMessages(restoredState.messages);
+    setServiceContext(restoredState.serviceContext);
+    setActiveService(restoredState.activeService);
+    setSuggestions(restoredState.suggestions || chatbotData.prompts[language]);
+    
+    // Update stats and patterns from restored conversation
+    setConversationStats(getConversationStats(restoredState.messages, restoredState.serviceContext));
+    setConversationPatterns(detectConversationPatterns(restoredState.messages));
+    
+    console.log('Conversation restored from storage');
+  } else {
+    // Create fresh conversation state
+    const freshState = createFreshConversationState(chatbotData, language);
+    setChatMessages(freshState.messages);
+    setServiceContext(freshState.serviceContext);
+    setActiveService(freshState.activeService);
+    setSuggestions(freshState.suggestions);
+    
+    // Initialize stats for fresh conversation
+    setConversationStats(getConversationStats(freshState.messages, freshState.serviceContext));
+    setConversationPatterns({});
+  }
+}, [language]);
 
   // Auto-scroll to the latest message
   useEffect(() => {
@@ -111,46 +150,38 @@ export default function ChatBot() {
   }, [isChatOpen]);
 
   // Enhanced close handler with cleanup
-  const handleCloseChat = useCallback((shouldSave = false) => {
-    setIsClosing(true);
+// 4. UPDATE handleCloseChat FUNCTION
+const handleCloseChat = useCallback((shouldSave = false) => {
+  setIsClosing(true);
+  
+  // Save conversation state using utility function
+  if (shouldSave && chatMessages.length > 1) {
+    const saveSuccess = saveConversationState(
+      chatMessages, 
+      serviceContext, 
+      activeService, 
+      language
+    );
     
-    // Optional: Save conversation state before closing
-    if (shouldSave && chatMessages.length > 1) {
-      try {
-        const conversationState = {
-          messages: chatMessages,
-          serviceContext: serviceContext,
-          activeService: activeService,
-          detectionHistory: detectionHistory, // **NEW: Save detection history**
-          currentDetectionResult: currentDetectionResult, // **NEW: Save current detection**
-          timestamp: new Date().toISOString(),
-          language: language
-        };
-        
-        // Store in sessionStorage for potential restoration
-        sessionStorage.setItem('chatbot_last_conversation', JSON.stringify(conversationState));
-        
-        console.log('Conversation saved before closing');
-      } catch (error) {
-        console.warn('Failed to save conversation state:', error);
-      }
+    if (saveSuccess) {
+      console.log('Conversation saved successfully');
     }
-    
-    // Clear typing state
-    setIsTyping(false);
-    
-    // Reset message input
-    setMessage('');
-    
-    // Close chat with animation delay
-    setTimeout(() => {
-      setIsChatOpen(false);
-      setIsClosing(false);
-    }, 200);
-    
-  }, [chatMessages, serviceContext, activeService, language, detectionHistory, currentDetectionResult]);
+  }
+  
+  // Clear typing state and reset message input
+  setIsTyping(false);
+  setMessage('');
+  
+  // Close chat with animation delay
+  setTimeout(() => {
+    setIsChatOpen(false);
+    setIsClosing(false);
+  }, 200);
+  
+}, [chatMessages, serviceContext, activeService, language]);
+  
 
-  // Enhanced outside click handler
+// Enhanced outside click handler
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (containerRef.current && 
@@ -194,353 +225,470 @@ export default function ChatBot() {
     };
   }, [isChatOpen, isClosing, handleCloseChat]);
 
-  // **NEW: Enhanced restoration with detection history**
-  const restorePreviousConversation = useCallback(() => {
-    try {
-      const savedConversation = sessionStorage.getItem('chatbot_last_conversation');
-      if (savedConversation) {
-        const conversationState = JSON.parse(savedConversation);
-        
-        // Check if conversation is recent (within last hour)
-        const savedTime = new Date(conversationState.timestamp);
-        const currentTime = new Date();
-        const timeDiff = currentTime - savedTime;
-        const oneHour = 60 * 60 * 1000;
-        
-        if (timeDiff < oneHour && conversationState.messages.length > 1) {
-          setChatMessages(conversationState.messages);
-          setServiceContext(conversationState.serviceContext || createFreshServiceContext());
-          setActiveService(conversationState.activeService);
-          
-          // **NEW: Restore detection history and current detection**
-          if (conversationState.detectionHistory) {
-            setDetectionHistory(conversationState.detectionHistory);
-          }
-          if (conversationState.currentDetectionResult) {
-            setCurrentDetectionResult(conversationState.currentDetectionResult);
-          }
-          
-          // Add restoration message
-          const restoreMessage = language === 'sw' ? 
-            '↩️ Mazungumzo yako ya awali yamerejesha.' : 
-            '↩️ Your previous conversation has been restored.';
-          
-          setTimeout(() => {
-            setChatMessages(prev => [...prev, {
-              role: 'bot',
-              content: restoreMessage,
-              timestamp: new Date().toISOString(),
-              isSystemMessage: true
-            }]);
-          }, 500);
-          
-          return true;
-        }
-      }
-    } catch (error) {
-      console.warn('Failed to restore conversation:', error);
-    }
-    return false;
-  }, [language]);
-
-  // **MAIN ENHANCEMENT: Enhanced message processing with advanced service detection**
-  const handleMessageSend = () => {
-    if (!message.trim() || isClosing) return;
+// 5. UPDATE restorePreviousConversation FUNCTION
+const restorePreviousConversation = useCallback(() => {
+  const restoredState = restoreConversationState(language);
+  
+  if (restoredState) {
+    setChatMessages(restoredState.messages);
+    setServiceContext(restoredState.serviceContext);
+    setActiveService(restoredState.activeService);
+    setSuggestions(restoredState.suggestions || chatbotData.prompts[language]);
     
-    const userMessage = message.trim();
+    // Update conversation analytics
+    setConversationStats(getConversationStats(restoredState.messages, restoredState.serviceContext));
+    setConversationPatterns(detectConversationPatterns(restoredState.messages));
     
-    // Use detectLanguage utility to detect language from user message
-    const detectedLang = detectLanguage(userMessage, null, language);
+    // Add restoration message using utility function
+    const restoreMessage = language === 'sw' ? 
+      '↩️ Mazungumzo yako ya awali yamerejesha.' : 
+      '↩️ Your previous conversation has been restored.';
     
-    // **NEW: Use enhanced service detection with confidence scoring**
-    const enhancedServiceDetection = detectServiceWithConfidence(
-      userMessage, 
-      detectedLang, 
-      chatbotData.serviceKeywords,
-      serviceContext // Pass previous context for contextual detection
-    );
-    
-    // Validate the enhanced detection result
-    if (!validateServiceDetection(enhancedServiceDetection)) {
-      console.warn('Enhanced service detection failed, falling back to basic detection');
-      // Fallback to basic detection if enhanced detection fails
-      const basicDetection = detectServiceFromMessage(userMessage, detectedLang);
-      enhancedServiceDetection.service = basicDetection.service;
-      enhancedServiceDetection.confidence = basicDetection.confidence || 0.5;
-      enhancedServiceDetection.matchedTerms = basicDetection.matchedTerms || [];
-      enhancedServiceDetection.alternativeServices = [];
-      enhancedServiceDetection.detectionMethod = 'fallback_basic';
-    }
-    
-    // **NEW: Update detection history**
-    const detectionRecord = {
-      message: userMessage,
-      timestamp: new Date().toISOString(),
-      detection: enhancedServiceDetection,
-      language: detectedLang
-    };
-    
-    setDetectionHistory(prev => [...prev.slice(-9), detectionRecord]); // Keep last 10 detections
-    setCurrentDetectionResult(enhancedServiceDetection);
-    
-    // **NEW: Enhanced debug logging for development**
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Enhanced Service Detection Result:', {
-        summary: getDetectionSummary(enhancedServiceDetection),
-        fullResult: enhancedServiceDetection,
-        detectionHistory: detectionHistory.length
-      });
-    }
-    
-    // Analyze message intent using the response generator utility
-    const intentAnalysis = analyzeMessageIntent(userMessage, detectedLang);
-    
-    // **NEW: Enhanced service context update with confidence-based logic**
-    let updatedServiceContext;
-    if (enhancedServiceDetection.confidence > 0.7) {
-      // High confidence: definitely update service context
-      updatedServiceContext = updateServiceContext(
-        serviceContext, 
-        enhancedServiceDetection.service, 
-        userMessage
-      );
-    } else if (enhancedServiceDetection.confidence > 0.4) {
-      // Medium confidence: update but preserve previous context influence
-      updatedServiceContext = updateServiceContext(
-        serviceContext, 
-        enhancedServiceDetection.service, 
-        userMessage,
-        { preservePrevious: true, confidenceThreshold: 0.4 }
-      );
-    } else {
-      // Low confidence: don't change service context, just update conversation
-      updatedServiceContext = updateServiceContext(
-        serviceContext, 
-        null, // Don't change current service
-        userMessage
-      );
-    }
-    
-    setServiceContext(updatedServiceContext);
-    
-    // **NEW: Enhanced user message with comprehensive detection metadata**
-    setChatMessages(prev => [...prev, { 
-      role: 'user', 
-      content: userMessage,
-      timestamp: new Date().toISOString(),
-      language: detectedLang,
-      // Enhanced service detection data
-      enhancedDetection: enhancedServiceDetection,
-      detectedService: enhancedServiceDetection.service,
-      detectionConfidence: enhancedServiceDetection.confidence,
-      detectionMethod: enhancedServiceDetection.detectionMethod,
-      matchedTerms: enhancedServiceDetection.matchedTerms,
-      alternativeServices: enhancedServiceDetection.alternativeServices,
-      contextInfluence: enhancedServiceDetection.contextInfluence,
-      // Legacy compatibility
-      serviceContext: updatedServiceContext.currentService,
-      confidence: enhancedServiceDetection.confidence,
-      intentAnalysis: intentAnalysis
-    }]);
-    
-    setMessage('');
-    setIsTyping(true);
-    
-    // **NEW: Enhanced language auto-switching with confidence consideration**
-    const userMessagesInDetectedLang = chatMessages.filter(
-      msg => msg.role === 'user' && msg.language === detectedLang
-    ).length;
-    
-    if (detectedLang !== language && userMessagesInDetectedLang >= 2) {
-      console.log(`User consistently using ${detectedLang}, consider switching language`);
-      // **NEW: Auto-switch if detection confidence is consistently high**
-      const recentHighConfidenceDetections = detectionHistory
-        .slice(-3)
-        .filter(record => record.language === detectedLang && record.detection.confidence > 0.6);
+    setTimeout(() => {
+      const restorationMsg = {
+        role: 'bot',
+        content: restoreMessage,
+        isSystemMessage: true
+      };
       
-      if (recentHighConfidenceDetections.length >= 2) {
-        console.log('High confidence language consistency detected, auto-switching language');
-        // Uncomment the line below if you want to auto-switch language
-        // setLanguage(detectedLang);
-      }
+      setChatMessages(prev => addMessageToConversation(prev, restorationMsg));
+    }, 500);
+    
+    return true;
+  }
+  
+  return false;
+}, [language]);
+
+// Enhanced handleMessageSend function with full conversation management integration
+const handleMessageSend = () => {
+  if (!message.trim() || isClosing) return;
+  
+  const userMessage = message.trim();
+  
+  // Use detectLanguage utility to detect language from user message
+  const detectedLang = detectLanguage(userMessage, null, language);
+  
+  // **ENHANCED: Use enhanced service detection with confidence scoring**
+  const enhancedServiceDetection = detectServiceWithConfidence(
+    userMessage, 
+    detectedLang, 
+    chatbotData.serviceKeywords,
+    serviceContext // Pass previous context for contextual detection
+  );
+  
+  // Validate the enhanced detection result
+  if (!validateServiceDetection(enhancedServiceDetection)) {
+    console.warn('Enhanced service detection failed, falling back to basic detection');
+    // Fallback to basic detection if enhanced detection fails
+    const basicDetection = detectServiceFromMessage(userMessage, detectedLang);
+    enhancedServiceDetection.service = basicDetection.service;
+    enhancedServiceDetection.confidence = basicDetection.confidence || 0.5;
+    enhancedServiceDetection.matchedTerms = basicDetection.matchedTerms || [];
+    enhancedServiceDetection.alternativeServices = [];
+    enhancedServiceDetection.detectionMethod = 'fallback_basic';
+  }
+  
+  // **ENHANCED: Update detection history**
+  const detectionRecord = {
+    message: userMessage,
+    timestamp: new Date().toISOString(),
+    detection: enhancedServiceDetection,
+    language: detectedLang
+  };
+  
+  setDetectionHistory(prev => [...prev.slice(-9), detectionRecord]); // Keep last 10 detections
+  setCurrentDetectionResult(enhancedServiceDetection);
+  
+  // **ENHANCED: Enhanced debug logging for development**
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Enhanced Service Detection Result:', {
+      summary: getDetectionSummary(enhancedServiceDetection),
+      fullResult: enhancedServiceDetection,
+      detectionHistory: detectionHistory.length
+    });
+  }
+  
+  // Analyze message intent using the response generator utility
+  const intentAnalysis = analyzeMessageIntent(userMessage, detectedLang);
+  
+  // **ENHANCED: Enhanced service context update with confidence-based logic**
+  let updatedServiceContext;
+  if (enhancedServiceDetection.confidence > 0.7) {
+    // High confidence: definitely update service context
+    updatedServiceContext = updateServiceContext(
+      serviceContext, 
+      enhancedServiceDetection.service, 
+      userMessage
+    );
+  } else if (enhancedServiceDetection.confidence > 0.4) {
+    // Medium confidence: update but preserve previous context influence
+    updatedServiceContext = updateServiceContext(
+      serviceContext, 
+      enhancedServiceDetection.service, 
+      userMessage,
+      { preservePrevious: true, confidenceThreshold: 0.4 }
+    );
+  } else {
+    // Low confidence: don't change service context, just update conversation
+    updatedServiceContext = updateServiceContext(
+      serviceContext, 
+      null, // Don't change current service
+      userMessage
+    );
+  }
+  
+  setServiceContext(updatedServiceContext);
+  
+  // **NEW: Use utility function to add user message with comprehensive metadata**
+  const userMessageObj = {
+    role: 'user', 
+    content: userMessage,
+    timestamp: new Date().toISOString(),
+    language: detectedLang,
+    // Enhanced service detection data
+    enhancedDetection: enhancedServiceDetection,
+    detectedService: enhancedServiceDetection.service,
+    detectionConfidence: enhancedServiceDetection.confidence,
+    detectionMethod: enhancedServiceDetection.detectionMethod,
+    matchedTerms: enhancedServiceDetection.matchedTerms,
+    alternativeServices: enhancedServiceDetection.alternativeServices,
+    contextInfluence: enhancedServiceDetection.contextInfluence,
+    // Legacy compatibility
+    serviceContext: updatedServiceContext.currentService,
+    confidence: enhancedServiceDetection.confidence,
+    intentAnalysis: intentAnalysis
+  };
+  
+  // **NEW: Add message using conversation manager utility**
+  setChatMessages(prev => addMessageToConversation(prev, userMessageObj));
+  
+  // **NEW: Prune conversation if it gets too long**
+  setChatMessages(prev => pruneConversation(prev, maxMessages));
+  
+  setMessage('');
+  setIsTyping(true);
+  
+  // **ENHANCED: Enhanced language auto-switching with confidence consideration**
+  const userMessagesInDetectedLang = chatMessages.filter(
+    msg => msg.role === 'user' && msg.language === detectedLang
+  ).length;
+  
+  if (detectedLang !== language && userMessagesInDetectedLang >= 2) {
+    console.log(`User consistently using ${detectedLang}, consider switching language`);
+    // **ENHANCED: Auto-switch if detection confidence is consistently high**
+    const recentHighConfidenceDetections = detectionHistory
+      .slice(-3)
+      .filter(record => record.language === detectedLang && record.detection.confidence > 0.6);
+    
+    if (recentHighConfidenceDetections.length >= 2) {
+      console.log('High confidence language consistency detected, auto-switching language');
+      // Uncomment the line below if you want to auto-switch language
+      // setLanguage(detectedLang);
     }
-    
-    // Scroll to bottom immediately after sending message
-    setTimeout(() => {
-      if (chatEndRef.current) {
-        chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+  }
+  
+  // **NEW: Update conversation stats and patterns after user message**
+  setTimeout(() => {
+    setChatMessages(currentMessages => {
+      const updatedStats = getConversationStats(currentMessages, updatedServiceContext);
+      const updatedPatterns = detectConversationPatterns(currentMessages);
+      
+      setConversationStats(updatedStats);
+      setConversationPatterns(updatedPatterns);
+      
+      return currentMessages;
+    });
+  }, 100);
+  
+  // Scroll to bottom immediately after sending message
+  setTimeout(() => {
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, 50);
+  
+  // **ENHANCED: Enhanced response generation with confidence-aware processing**
+  setTimeout(() => {
+    try {
+      // **ENHANCED: Use enhanced detection results in response generation**
+      const generatedResponse = generateContextualResponse(
+        userMessage,
+        enhancedServiceDetection, // Pass enhanced detection instead of basic
+        intentAnalysis,
+        chatbotData,
+        detectedLang,
+        updatedServiceContext,
+        pricingData
+      );
+      
+      // Validate the generated response
+      if (!validateResponse(generatedResponse)) {
+        console.warn('Generated response validation failed, falling back to enhanced processing');
+        throw new Error('Invalid response structure');
       }
-    }, 50);
-    
-    // **NEW: Enhanced response generation with confidence-aware processing**
-    setTimeout(() => {
-      try {
-        // **NEW: Use enhanced detection results in response generation**
-        const generatedResponse = generateContextualResponse(
-          userMessage,
-          enhancedServiceDetection, // Pass enhanced detection instead of basic
-          intentAnalysis,
-          chatbotData,
+      
+      // Use the generated response
+      let finalResponse = generatedResponse.text;
+      let responseMetadata = generatedResponse.metadata || {};
+      
+      // **ENHANCED: Enhanced metadata with detection details**
+      responseMetadata.enhancedDetection = enhancedServiceDetection;
+      responseMetadata.detectionSummary = getDetectionSummary(enhancedServiceDetection);
+      
+      // **ENHANCED: Add confidence-based response enhancement**
+      if (enhancedServiceDetection.confidence > 0.8 && enhancedServiceDetection.service) {
+        const confidenceNote = detectedLang === 'sw' ? 
+          `\n\n✨ Nina uhakika wa ${Math.round(enhancedServiceDetection.confidence * 100)}% kuwa unahitaji msaada wa ${enhancedServiceDetection.service}.` :
+          `\n\n✨ I'm ${Math.round(enhancedServiceDetection.confidence * 100)}% confident you need help with ${enhancedServiceDetection.service}.`;
+        
+        finalResponse += confidenceNote;
+      }
+      
+      // **ENHANCED: Add alternative services suggestion for medium confidence**
+      if (enhancedServiceDetection.confidence > 0.4 && 
+          enhancedServiceDetection.confidence < 0.7 && 
+          enhancedServiceDetection.alternativeServices.length > 0) {
+        
+        const alternatives = enhancedServiceDetection.alternativeServices
+          .slice(0, 2)
+          .map(alt => alt.service)
+          .join(', ');
+        
+        const alternativeNote = detectedLang === 'sw' ? 
+          `\n\n🤔 Au labda unahitaji msaada wa: ${alternatives}?` :
+          `\n\n🤔 Or perhaps you need help with: ${alternatives}?`;
+        
+        finalResponse += alternativeNote;
+      }
+      
+      // **NEW: Create bot message object with comprehensive metadata**
+      const botMessageObj = {
+        role: 'bot', 
+        content: finalResponse,
+        timestamp: new Date().toISOString(),
+        language: detectedLang,
+        serviceContext: updatedServiceContext.currentService,
+        conversationDepth: updatedServiceContext.conversationDepth,
+        responseType: generatedResponse.type,
+        responseMetadata: responseMetadata,
+        insights: getConversationInsights(updatedServiceContext),
+        // Enhanced detection metadata
+        enhancedDetection: enhancedServiceDetection,
+        detectionSummary: getDetectionSummary(enhancedServiceDetection),
+        confidenceLevel: enhancedServiceDetection.confidence > 0.8 ? 'high' : 
+                        enhancedServiceDetection.confidence > 0.4 ? 'medium' : 'low'
+      };
+      
+      // **NEW: Add bot message using conversation manager and handle auto-save**
+      setChatMessages(prev => {
+        const updatedMessages = addMessageToConversation(prev, botMessageObj);
+        
+        // **NEW: Auto-save conversation after bot response**
+        saveConversationState(updatedMessages, updatedServiceContext, activeService, detectedLang);
+        
+        // **NEW: Update stats after bot response**
+        const newStats = getConversationStats(updatedMessages, updatedServiceContext);
+        const newPatterns = detectConversationPatterns(updatedMessages);
+        
+        setConversationStats(newStats);
+        setConversationPatterns(newPatterns);
+        
+        return updatedMessages;
+      });
+      
+      // **ENHANCED: Enhanced contextual suggestions based on detection results**
+      let contextualPrompts;
+      if (enhancedServiceDetection.confidence > 0.6 && enhancedServiceDetection.service) {
+        // High confidence: generate service-specific prompts
+        contextualPrompts = generateContextualPrompts(
+          enhancedServiceDetection.service, 
+          updatedServiceContext.conversationDepth, 
           detectedLang,
-          updatedServiceContext,
-          pricingData
+          updatedServiceContext
         );
-        
-        // Validate the generated response
-        if (!validateResponse(generatedResponse)) {
-          console.warn('Generated response validation failed, falling back to enhanced processing');
-          throw new Error('Invalid response structure');
-        }
-        
-        // Use the generated response
-        let finalResponse = generatedResponse.text;
-        let responseMetadata = generatedResponse.metadata || {};
-        
-        // **NEW: Enhanced metadata with detection details**
-        responseMetadata.enhancedDetection = enhancedServiceDetection;
-        responseMetadata.detectionSummary = getDetectionSummary(enhancedServiceDetection);
-        
-        // **NEW: Add confidence-based response enhancement**
-        if (enhancedServiceDetection.confidence > 0.8 && enhancedServiceDetection.service) {
-          const confidenceNote = detectedLang === 'sw' ? 
-            `\n\n✨ Nina uhakika wa ${Math.round(enhancedServiceDetection.confidence * 100)}% kuwa unahitaji msaada wa ${enhancedServiceDetection.service}.` :
-            `\n\n✨ I'm ${Math.round(enhancedServiceDetection.confidence * 100)}% confident you need help with ${enhancedServiceDetection.service}.`;
-          
-          finalResponse += confidenceNote;
-        }
-        
-        // **NEW: Add alternative services suggestion for medium confidence**
-        if (enhancedServiceDetection.confidence > 0.4 && 
-            enhancedServiceDetection.confidence < 0.7 && 
-            enhancedServiceDetection.alternativeServices.length > 0) {
-          
-          const alternatives = enhancedServiceDetection.alternativeServices
-            .slice(0, 2)
-            .map(alt => alt.service)
-            .join(', ');
-          
-          const alternativeNote = detectedLang === 'sw' ? 
-            `\n\n🤔 Au labda unahitaji msaada wa: ${alternatives}?` :
-            `\n\n🤔 Or perhaps you need help with: ${alternatives}?`;
-          
-          finalResponse += alternativeNote;
-        }
-        
-        // **NEW: Enhanced bot message with comprehensive detection metadata**
-        setChatMessages(prev => [...prev, { 
-          role: 'bot', 
-          content: finalResponse,
-          timestamp: new Date().toISOString(),
-          language: detectedLang,
-          serviceContext: updatedServiceContext.currentService,
-          conversationDepth: updatedServiceContext.conversationDepth,
-          responseType: generatedResponse.type,
-          responseMetadata: responseMetadata,
-          insights: getConversationInsights(updatedServiceContext),
-          // Enhanced detection metadata
-          enhancedDetection: enhancedServiceDetection,
-          detectionSummary: getDetectionSummary(enhancedServiceDetection),
-          confidenceLevel: enhancedServiceDetection.confidence > 0.8 ? 'high' : 
-                          enhancedServiceDetection.confidence > 0.4 ? 'medium' : 'low'
-        }]);
-        
-        // **NEW: Enhanced contextual suggestions based on detection results**
-        let contextualPrompts;
-        if (enhancedServiceDetection.confidence > 0.6 && enhancedServiceDetection.service) {
-          // High confidence: generate service-specific prompts
-          contextualPrompts = generateContextualPrompts(
-            enhancedServiceDetection.service, 
-            updatedServiceContext.conversationDepth, 
+      } else if (enhancedServiceDetection.alternativeServices.length > 0) {
+        // Medium confidence: include alternative service prompts
+        const alternativePrompts = enhancedServiceDetection.alternativeServices
+          .slice(0, 2)
+          .flatMap(alt => generateContextualPrompts(
+            alt.service, 
+            0, 
             detectedLang,
             updatedServiceContext
-          );
-        } else if (enhancedServiceDetection.alternativeServices.length > 0) {
-          // Medium confidence: include alternative service prompts
-          const alternativePrompts = enhancedServiceDetection.alternativeServices
-            .slice(0, 2)
-            .flatMap(alt => generateContextualPrompts(
-              alt.service, 
-              0, 
-              detectedLang,
-              updatedServiceContext
-            ));
-          
-          contextualPrompts = alternativePrompts.length > 0 ? 
-            alternativePrompts : chatbotData.prompts[detectedLang];
-        } else {
-          // Low confidence: use default prompts
-          contextualPrompts = chatbotData.prompts[detectedLang];
-        }
+          ));
         
-        setSuggestions(contextualPrompts.length > 0 ? contextualPrompts : chatbotData.prompts[detectedLang]);
-        
-        // **NEW: Enhanced active service setting based on confidence**
-        if (generatedResponse.service) {
-          setActiveService(generatedResponse.service);
-        } else if (enhancedServiceDetection.confidence > 0.6 && enhancedServiceDetection.service) {
-          setActiveService(enhancedServiceDetection.service);
-        } else if (updatedServiceContext.currentService) {
-          setActiveService(updatedServiceContext.currentService);
-        }
-        
-        console.log('Enhanced response generated successfully:', {
-          type: generatedResponse.type,
-          service: generatedResponse.service,
-          confidence: enhancedServiceDetection.confidence,
-          method: enhancedServiceDetection.detectionMethod,
-          alternatives: enhancedServiceDetection.alternativeServices.length,
-          metadata: responseMetadata
-        });
-        
-      } catch (error) {
-        console.error('Error in enhanced response generation, falling back to basic processing:', error);
-        
-        // **NEW: Enhanced fallback processing with detection results**
-        let responseData = processUserMessage(userMessage, chatbotData, detectedLang);
-        let finalResponse = responseData.text;
-        
-        // Enhanced response with service context and pricing information (fallback)
-        if (enhancedServiceDetection.service && isPricingInquiry(userMessage, detectedLang)) {
-          const pricingResponse = generatePricingResponse(enhancedServiceDetection.service, detectedLang, pricingData);
-          finalResponse = pricingResponse;
-        } else if (enhancedServiceDetection.service && !isPricingInquiry(userMessage, detectedLang)) {
-          const serviceResponse = getServiceResponse(enhancedServiceDetection.service, chatbotData, detectedLang);
-          if (serviceResponse && serviceResponse !== responseData.text) {
-            finalResponse = serviceResponse;
-          }
-        }
-        
-        // Add conversation insights for high engagement (fallback)
-        const insights = getConversationInsights(updatedServiceContext);
-        if (insights.insights.includes('Deep engagement detected')) {
-          const engagementNote = detectedLang === 'sw' ? 
-            '\n\n💡 Ninaona una maswali mengi. Je, ungependa kuongea na mtaalamu wetu moja kwa moja?' :
-            '\n\n💡 I can see you have many questions. Would you like to speak with our specialist directly?';
-          finalResponse += engagementNote;
-        }
-        
-        // **NEW: Enhanced fallback message with detection info**
-        setChatMessages(prev => [...prev, { 
-          role: 'bot', 
-          content: finalResponse,
-          timestamp: new Date().toISOString(),
-          language: detectedLang,
-          serviceContext: updatedServiceContext.currentService,
-          conversationDepth: updatedServiceContext.conversationDepth,
-          insights: insights,
-          fallbackUsed: true,
-          // Enhanced detection metadata even in fallback
-          enhancedDetection: enhancedServiceDetection,
-          detectionSummary: getDetectionSummary(enhancedServiceDetection)
-        }]);
-        
-        setSuggestions(responseData.suggestions || chatbotData.prompts[detectedLang]);
-        setActiveService(enhancedServiceDetection.service || updatedServiceContext.currentService);
+        contextualPrompts = alternativePrompts.length > 0 ? 
+          alternativePrompts : chatbotData.prompts[detectedLang];
+      } else {
+        // Low confidence: use default prompts
+        contextualPrompts = chatbotData.prompts[detectedLang];
       }
       
-      setIsTyping(false);
-    }, 1500);
-  };
+      setSuggestions(contextualPrompts.length > 0 ? contextualPrompts : chatbotData.prompts[detectedLang]);
+      
+      // **ENHANCED: Enhanced active service setting based on confidence**
+      if (generatedResponse.service) {
+        setActiveService(generatedResponse.service);
+      } else if (enhancedServiceDetection.confidence > 0.6 && enhancedServiceDetection.service) {
+        setActiveService(enhancedServiceDetection.service);
+      } else if (updatedServiceContext.currentService) {
+        setActiveService(updatedServiceContext.currentService);
+      }
+      
+      console.log('Enhanced response generated successfully:', {
+        type: generatedResponse.type,
+        service: generatedResponse.service,
+        confidence: enhancedServiceDetection.confidence,
+        method: enhancedServiceDetection.detectionMethod,
+        alternatives: enhancedServiceDetection.alternativeServices.length,
+        metadata: responseMetadata,
+        conversationLength: chatMessages.length + 2, // +2 for user and bot messages just added
+        stats: conversationStats
+      });
+      
+    } catch (error) {
+      console.error('Error in enhanced response generation, falling back to basic processing:', error);
+      
+      // **ENHANCED: Enhanced fallback processing with detection results**
+      let responseData = processUserMessage(userMessage, chatbotData, detectedLang);
+      let finalResponse = responseData.text;
+      
+      // Enhanced response with service context and pricing information (fallback)
+      if (enhancedServiceDetection.service && isPricingInquiry(userMessage, detectedLang)) {
+        const pricingResponse = generatePricingResponse(enhancedServiceDetection.service, detectedLang, pricingData);
+        finalResponse = pricingResponse;
+      } else if (enhancedServiceDetection.service && !isPricingInquiry(userMessage, detectedLang)) {
+        const serviceResponse = getServiceResponse(enhancedServiceDetection.service, chatbotData, detectedLang);
+        if (serviceResponse && serviceResponse !== responseData.text) {
+          finalResponse = serviceResponse;
+        }
+      }
+      
+      // Add conversation insights for high engagement (fallback)
+      const insights = getConversationInsights(updatedServiceContext);
+      if (insights.insights.includes('Deep engagement detected')) {
+        const engagementNote = detectedLang === 'sw' ? 
+          '\n\n💡 Ninaona una maswali mengi. Je, ungependa kuongea na mtaalamu wetu moja kwa moja?' :
+          '\n\n💡 I can see you have many questions. Would you like to speak with our specialist directly?';
+        finalResponse += engagementNote;
+      }
+      
+      // **NEW: Enhanced fallback message with detection info using conversation manager**
+      const fallbackBotMessageObj = {
+        role: 'bot', 
+        content: finalResponse,
+        timestamp: new Date().toISOString(),
+        language: detectedLang,
+        serviceContext: updatedServiceContext.currentService,
+        conversationDepth: updatedServiceContext.conversationDepth,
+        insights: insights,
+        fallbackUsed: true,
+        // Enhanced detection metadata even in fallback
+        enhancedDetection: enhancedServiceDetection,
+        detectionSummary: getDetectionSummary(enhancedServiceDetection)
+      };
+      
+      // **NEW: Add fallback message using conversation manager**
+      setChatMessages(prev => {
+        const updatedMessages = addMessageToConversation(prev, fallbackBotMessageObj);
+        
+        // **NEW: Auto-save even on fallback**
+        saveConversationState(updatedMessages, updatedServiceContext, activeService, detectedLang);
+        
+        // **NEW: Update stats after fallback response**
+        const newStats = getConversationStats(updatedMessages, updatedServiceContext);
+        const newPatterns = detectConversationPatterns(updatedMessages);
+        
+        setConversationStats(newStats);
+        setConversationPatterns(newPatterns);
+        
+        return updatedMessages;
+      });
+      
+      setSuggestions(responseData.suggestions || chatbotData.prompts[detectedLang]);
+      setActiveService(enhancedServiceDetection.service || updatedServiceContext.currentService);
+    }
+    
+    setIsTyping(false);
+  }, 1500);
+};
+
+// **NEW: Additional helper functions for conversation management integration**
+
+// Function to handle conversation export
+const handleExportConversation = () => {
+  const exportData = exportConversation(
+    chatMessages, 
+    serviceContext, 
+    {
+      includeMessages: true,
+      includeContext: true,
+      includeStats: true,
+      includeDetectionHistory: true,
+      anonymize: false, // Set to true for privacy
+      additionalData: {
+        conversationStats,
+        conversationPatterns,
+        detectionHistory: detectionHistory.slice(-10) // Last 10 detections
+      }
+    }
+  );
+  
+  // Create download link
+  const dataStr = JSON.stringify(exportData, null, 2);
+  const dataBlob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(dataBlob);
+  
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `chat-export-${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
+// Function to handle conversation clearing
+const handleClearConversation = () => {
+  clearConversationState();
+  
+  // Reset to fresh state
+  const freshState = createFreshConversationState(chatbotData, language);
+  setChatMessages(freshState.messages);
+  setServiceContext(freshState.serviceContext);
+  setActiveService(null);
+  setSuggestions(freshState.suggestions);
+  
+  // Reset analytics and detection history
+  setConversationStats(getConversationStats(freshState.messages, freshState.serviceContext));
+  setConversationPatterns({});
+  setDetectionHistory([]);
+  setCurrentDetectionResult(null);
+  
+  console.log('Conversation cleared and reset to fresh state');
+};
+
+// **NEW: Conversation validation effect**
+useEffect(() => {
+  // Validate and prune conversation periodically
+  setChatMessages(prev => {
+    const prunedMessages = pruneConversation(prev, maxMessages);
+    
+    if (prunedMessages.length !== prev.length) {
+      console.log(`Conversation pruned from ${prev.length} to ${prunedMessages.length} messages`);
+      
+      // Update stats after pruning
+      const newStats = getConversationStats(prunedMessages, serviceContext);
+      setConversationStats(newStats);
+      
+      // Auto-save after pruning
+      saveConversationState(prunedMessages, serviceContext, activeService, language);
+    }
+    
+    return prunedMessages;
+  });
+}, [chatMessages.length, serviceContext, maxMessages, activeService, language]);
 
   const handleQuickPrompt = (prompt) => {
     if (isClosing) return;
