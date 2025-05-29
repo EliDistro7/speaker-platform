@@ -1,5 +1,5 @@
 // utils/suggestionEngine.js
-import { serviceDescriptions } from '@/data/serviceDescriptions';
+import { serviceDescriptions } from '@/data/chat/serviceDescriptions';
 
 /**
  * Smart Suggestion Engine for ChatBot

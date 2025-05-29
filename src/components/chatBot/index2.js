@@ -47,6 +47,15 @@ import {
 } from './utils/serviceDetector';
 
 
+// 1. ADD NEW IMPORT at the top of your ChatBot component
+import {
+  generateSmartSuggestions,
+  generateContextualSuggestions,
+  generateFollowUpSuggestions,
+  generateIndustrySuggestions
+} from './utils/suggestionEngine';
+
+
 // 1. ADD NEW IMPORTS (add to existing imports section)
 import {
   saveConversationState,
@@ -84,6 +93,12 @@ export default function ChatBot() {
 const [conversationStats, setConversationStats] = useState({});
 const [conversationPatterns, setConversationPatterns] = useState({});
 const [maxMessages] = useState(50); // Configurable message limit
+const [suggestionAnalytics, setSuggestionAnalytics] = useState({
+  totalGenerated: 0,
+  smartSuggestionsUsed: 0,
+  fallbackSuggestionsUsed: 0,
+  userInteractionRate: 0
+});
   
   // Enhanced service context using utility functions
   const [serviceContext, setServiceContext] = useState(() => createFreshServiceContext());
@@ -497,33 +512,40 @@ const handleMessageSend = () => {
         return updatedMessages;
       });
       
-      // **ENHANCED: Enhanced contextual suggestions based on detection results**
-      let contextualPrompts;
-      if (enhancedServiceDetection.confidence > 0.6 && enhancedServiceDetection.service) {
-        // High confidence: generate service-specific prompts
-        contextualPrompts = generateContextualPrompts(
-          enhancedServiceDetection.service, 
-          updatedServiceContext.conversationDepth, 
-          detectedLang,
-          updatedServiceContext
-        );
-      } else if (enhancedServiceDetection.alternativeServices.length > 0) {
-        // Medium confidence: include alternative service prompts
-        const alternativePrompts = enhancedServiceDetection.alternativeServices
-          .slice(0, 2)
-          .flatMap(alt => generateContextualPrompts(
-            alt.service, 
-            0, 
-            detectedLang,
-            updatedServiceContext
-          ));
-        
-        contextualPrompts = alternativePrompts.length > 0 ? 
-          alternativePrompts : chatbotData.prompts[detectedLang];
-      } else {
-        // Low confidence: use default prompts
-        contextualPrompts = chatbotData.prompts[detectedLang];
-      }
+    // REPLACE THE ABOVE WITH:
+// **ENHANCED: Smart suggestion generation using the new suggestion engine**
+const smartSuggestions = generateSmartSuggestions(
+  updatedServiceContext,
+  updatedServiceContext.conversationDepth,
+  detectedLang,
+  userMessage,
+  chatMessages,
+  Object.keys(chatbotData.services || {})
+);
+
+// **ENHANCED: Generate follow-up suggestions based on bot response**
+let followUpSuggestions = [];
+if (finalResponse) {
+  followUpSuggestions = generateFollowUpSuggestions(
+    finalResponse,
+    updatedServiceContext.currentService,
+    detectedLang,
+    updatedServiceContext.conversationDepth
+  );
+}
+
+// Combine smart suggestions with follow-up suggestions
+const contextualPrompts = [
+  ...smartSuggestions,
+  ...followUpSuggestions.slice(0, 2) // Add up to 2 follow-up suggestions
+].slice(0, 4); // Limit to 4 total suggestions
+
+// Fallback to default if no suggestions generated
+const finalSuggestions = contextualPrompts.length > 0 ? 
+  contextualPrompts : 
+  chatbotData.prompts[detectedLang];
+
+setSuggestions(finalSuggestions);
       
       setSuggestions(contextualPrompts.length > 0 ? contextualPrompts : chatbotData.prompts[detectedLang]);
       
@@ -606,7 +628,20 @@ const handleMessageSend = () => {
         return updatedMessages;
       });
       
-      setSuggestions(responseData.suggestions || chatbotData.prompts[detectedLang]);
+     // **ENHANCED: Smart suggestions even in fallback mode**
+const fallbackSuggestions = generateSmartSuggestions(
+  updatedServiceContext,
+  updatedServiceContext.conversationDepth,
+  detectedLang,
+  userMessage,
+  chatMessages,
+  Object.keys(chatbotData.services || {})
+);
+
+setSuggestions(fallbackSuggestions.length > 0 ? 
+  fallbackSuggestions : 
+  (responseData.suggestions || chatbotData.prompts[detectedLang])
+);
       setActiveService(enhancedServiceDetection.service || updatedServiceContext.currentService);
     }
     
@@ -690,11 +725,39 @@ useEffect(() => {
   });
 }, [chatMessages.length, serviceContext, maxMessages, activeService, language]);
 
+
+// **NEW: Refresh suggestions when service context changes significantly**
+useEffect(() => {
+  if (serviceContext.currentService && chatMessages.length > 0) {
+    const contextualSuggestions = generateContextualSuggestions(
+      serviceContext.currentService,
+      serviceContext.conversationDepth,
+      language,
+      serviceContext
+    );
+    
+    if (contextualSuggestions.length > 0) {
+      setSuggestions(contextualSuggestions);
+    }
+  }
+}, [serviceContext.currentService, serviceContext.conversationDepth, language]);
+
   const handleQuickPrompt = (prompt) => {
     if (isClosing) return;
     setMessage(prompt);
     // Auto-submit the prompt after a brief delay
-    setTimeout(() => handleMessageSend(), 300);
+
+      // **NEW: Track suggestion analytics**
+  setSuggestionAnalytics(prev => ({
+    ...prev,
+    smartSuggestionsUsed: prev.smartSuggestionsUsed + 1,
+    userInteractionRate: ((prev.smartSuggestionsUsed + 1) / (prev.totalGenerated || 1)) * 100
+  }));
+  
+  setMessage(prompt);
+  // Auto-submit the prompt after a brief delay
+  setTimeout(() => handleMessageSend(), 300);
+    
   };
 
  
@@ -755,19 +818,47 @@ useEffect(() => {
   }, []);
 
   // Handle opening chat with optional conversation restoration
-  const handleOpenChat = () => {
-    setIsChatOpen(true);
-    
-    // Try to restore previous conversation
-    setTimeout(() => {
-      const restored = restorePreviousConversation();
-      if (!restored) {
-        // If no conversation was restored, show fresh welcome message
-        setChatMessages([{ role: 'bot', content: chatbotData.welcome[language] }]);
-        setSuggestions(chatbotData.prompts[language]);
-      }
-    }, 300);
-  };
+ // REPLACE WITH:
+const handleOpenChat = () => {
+  setIsChatOpen(true);
+  
+  // Try to restore previous conversation
+  setTimeout(() => {
+    const restored = restorePreviousConversation();
+    if (!restored) {
+      // If no conversation was restored, show fresh welcome message
+      setChatMessages([{ role: 'bot', content: chatbotData.welcome[language] }]);
+      
+      // **ENHANCED: Generate smart initial suggestions**
+      const initialSuggestions = generateSmartSuggestions(
+        createFreshServiceContext(),
+        0, // Initial conversation depth
+        language,
+        '', // No user message yet
+        [], // No chat history yet
+        Object.keys(chatbotData.services || {})
+      );
+      
+      setSuggestions(initialSuggestions.length > 0 ? 
+        initialSuggestions : 
+        chatbotData.prompts[language]
+      );
+    }
+  }, 300);
+};
+
+// **NEW: Industry-specific suggestion handler**
+const handleIndustrySuggestions = (industry) => {
+  const industrySuggestions = generateIndustrySuggestions(industry, language);
+  
+  if (industrySuggestions.length > 0) {
+    setSuggestions(prev => [
+      ...industrySuggestions,
+      ...prev.slice(0, 2) // Keep some existing suggestions
+    ].slice(0, 4));
+  }
+};
+
 
   // **NEW: Enhanced debug logging for development**
   useEffect(() => {
@@ -877,16 +968,30 @@ useEffect(() => {
                 borderTop: '1px solid rgba(55, 65, 81, 0.6)'
               }}
             >
-              <QuickPrompts 
-                suggestions={suggestions} 
-                onSelect={handleQuickPrompt}
-                // Enhanced service context for better prompt categorization
-                serviceContext={serviceContext}
-                conversationDepth={serviceContext.conversationDepth}
-                disabled={isClosing}
-                // NEW: Pass detection confidence to influence prompt selection
-                detectionConfidence={currentDetectionResult?.confidence || 0}
-              />
+             <QuickPrompts 
+  suggestions={suggestions} 
+  onSelect={handleQuickPrompt}
+  // Enhanced service context for better prompt categorization
+  serviceContext={serviceContext}
+  conversationDepth={serviceContext.conversationDepth}
+  disabled={isClosing}
+  // NEW: Pass detection confidence to influence prompt selection
+  detectionConfidence={currentDetectionResult?.confidence || 0}
+  // **NEW: Smart suggestion engine integration**
+  onRegenerateSuggestions={() => {
+    const newSuggestions = generateSmartSuggestions(
+      serviceContext,
+      serviceContext.conversationDepth,
+      language,
+      message,
+      chatMessages,
+      Object.keys(chatbotData.services || {})
+    );
+    setSuggestions(newSuggestions.length > 0 ? newSuggestions : chatbotData.prompts[language]);
+  }}
+  // **NEW: Industry suggestion handler**
+  onIndustrySuggestions={handleIndustrySuggestions}
+/>
               
               <ChatInput 
                 message={message}
