@@ -6,6 +6,7 @@ import { NavButton } from './NavButton';
 import { useLanguage } from '@/contexts/language';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { Globe, Menu, X, ChevronDown, User, Calendar, Ticket, ShoppingCart } from 'lucide-react';
+import { events } from '@/data';
 
 const translations = {
   en: {
@@ -38,6 +39,7 @@ export const Navigation = ({
   onViewChange, 
   speaker, 
   ticketCount,
+
   cartCount = 0,
   additionalNavItems = []
 }) => {
@@ -63,6 +65,7 @@ export const Navigation = ({
     switch(key) {
       case 'tickets': return ticketCount;
       case 'shop': return cartCount;
+      case 'events' : return events.length; // Assuming no count for events
       default: return 0;
     }
   };
@@ -145,17 +148,19 @@ export const Navigation = ({
                             <span>{item.key === 'tickets' ? t.myTickets : getNavItemLabel(item.key)}</span>
                           </div>
                         </NavButton>
-                        {itemCount > 0 && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className={`absolute -top-1 -right-1 h-5 w-5 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-sm ${
-                              item.key === 'shop' ? 'bg-indigo-500' : 'bg-red-500'
-                            }`}
-                          >
-                            {itemCount}
-                          </motion.div>
-                        )}
+                      {itemCount > 0 && (
+  <motion.div
+    initial={{ scale: 0 }}
+    animate={{ scale: 1 }}
+    className={`absolute -top-1 -right-1 h-5 w-5 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-sm ${
+      item.key === 'shop' ? 'bg-red-500' : 
+      item.key === 'events' ? 'bg-red-500' : 
+      'bg-red-500'
+    }`}
+  >
+    {itemCount}
+  </motion.div>
+)}
                       </motion.div>
                     );
                   })}

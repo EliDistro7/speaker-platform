@@ -1,11 +1,14 @@
+
 import { useLanguage } from '@/contexts/language';
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Star, Filter, Search, BookOpen, Package, Heart, Eye, Zap } from 'lucide-react';
-import { sampleBooks } from './data';
-import { translations } from './data';
-import CartModal from './CartModal'; // Import the CartModal component
+import { ShoppingCart, Star, Plus, Minus, Filter, Search, BookOpen, Package, Heart, Eye, Zap, X } from 'lucide-react';
+import {sampleBooks} from './data';
+import {translations} from './data';
 
-export const BooksShop = () => {
+
+import CartModal from './CartModal';
+
+export const BooksShop = ({ onCartUpdate }) => { // Add onCartUpdate prop
   const { language } = useLanguage();
   const t = translations[language] || translations.en;
   
@@ -16,7 +19,7 @@ export const BooksShop = () => {
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
   const [wishlist, setWishlist] = useState([]);
-  const [viewMode, setViewMode] = useState('all'); // all, featured, new, bestsellers
+  const [viewMode, setViewMode] = useState('all');
   const [showToast, setShowToast] = useState(null);
 
   const categories = ['all', ...new Set(books.map(book => book.category))];
@@ -27,11 +30,18 @@ export const BooksShop = () => {
     setTimeout(() => setShowToast(null), 3000);
   };
 
+  // Update cart count in parent whenever cart changes
+  useEffect(() => {
+    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    if (onCartUpdate) {
+      onCartUpdate(totalItems);
+    }
+  }, [cart, onCartUpdate]);
+
   // Filter books based on category, search, and view mode
   useEffect(() => {
     let filtered = books;
     
-    // Filter by view mode
     if (viewMode === 'featured') {
       filtered = filtered.filter(book => book.featured);
     } else if (viewMode === 'new') {
@@ -40,12 +50,10 @@ export const BooksShop = () => {
       filtered = filtered.filter(book => book.bestseller);
     }
     
-    // Filter by category
     if (selectedCategory !== 'all') {
       filtered = filtered.filter(book => book.category === selectedCategory);
     }
     
-    // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter(book => 
         book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -101,10 +109,11 @@ export const BooksShop = () => {
 
   const handleCheckout = () => {
     showToastMessage(t.orderSuccess);
-    setCart([]);
+    setCart([]); // This will trigger the useEffect to update parent with 0 items
     setShowCart(false);
   };
 
+  // Rest of your component remains the same...
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
       {/* Toast Notification */}
@@ -350,3 +359,4 @@ export const BooksShop = () => {
     </div>
   );
 };
+

@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, Sparkles, Globe, Star } from 'lucide-react';
 import { useInView } from 'react-intersection-observer';
@@ -20,8 +20,8 @@ import { PurchaseForm } from '@/components/forms/PurchaseForm';
 import { Button } from '@/components/ui/Button';
 import { QRCodeDisplay } from '@/components/tickets/QRCodeDisplay';
 import ProfileBanner from '@/components/banners/ProfileBanner';
-import ChatBot from '@/components/chatBot/index'; // Import ChatBot component
-import { speaker, events } from '@/data/index'; // Adjust the import path as needed
+import ChatBot from '@/components/chatBot/index';
+import { speaker, events } from '@/data/index';
 import SocialFooter from '@/components/layout/Footer';
 
 const translations = {
@@ -64,14 +64,14 @@ const translations = {
     internationalSpeaker: 'Mzungumzaji wa Kimataifa',
     entrepreneur: 'Mfanyabiashara',
     totalSpeaks: 'Jumla ya Mazungumzo',
-    rating: 'Kiwango',
+    rating: 'Kiwango',  
     loadingProfile: 'Inapakia wasifu...',
     noEvents: 'Hakuna matukio yaliyopatikana',
     noTickets: 'Bado haujanunua tiketi yoyote'
   }
 };
 
-// Floating particles animation component (Framer Motion kept for background)
+// Floating particles animation component
 const FloatingParticles = () => {
   const particles = Array.from({ length: 20 }, (_, i) => ({
     id: i,
@@ -82,7 +82,7 @@ const FloatingParticles = () => {
   }));
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden">
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
       {particles.map((particle) => (
         <motion.div
           key={particle.id}
@@ -110,12 +110,12 @@ const FloatingParticles = () => {
   );
 };
 
-// Enhanced background with gradient mesh (Framer Motion kept for background)
+// Enhanced background with gradient mesh
 const EnhancedBackground = () => {
   return (
     <div className="fixed inset-0 -z-10">
-      {/* Base gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50/80 to-indigo-100/90" />
+      {/* Base gradient matching BooksShop */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-blue-50" />
       
       {/* Animated gradient orbs */}
       <motion.div
@@ -165,19 +165,38 @@ const EnhancedBackground = () => {
 
 const Main = () => {
   const { language } = useLanguage();
-  console.log('Current language:', language);
   const t = translations[language];
   
   const [currentView, setCurrentView] = useState('profile');
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [tickets, setTickets] = useState([]);
-  const [cartCount, setCartCount] = useState(0); // Add cart count state
+  const [cartCount, setCartCount] = useState(0);
   const [purchaseForm, setPurchaseForm] = useState({ 
     name: '', 
     email: '', 
     phone: '', 
     quantity: 1 
   });
+
+  const handleFormChange = useCallback((updateFn) => {
+    setPurchaseForm(updateFn);
+  }, []);
+
+  const handleNameChange = useCallback((e) => {
+    setPurchaseForm(prev => ({ ...prev, name: e.target.value }));
+  }, []);
+
+  const handleEmailChange = useCallback((e) => {
+    setPurchaseForm(prev => ({ ...prev, email: e.target.value }));
+  }, []);
+
+  const handlePhoneChange = useCallback((e) => {
+    setPurchaseForm(prev => ({ ...prev, phone: e.target.value }));
+  }, []);
+
+  const handleQuantityChange = useCallback((e) => {
+    setPurchaseForm(prev => ({ ...prev, quantity: parseInt(e.target.value) }));
+  }, []);
 
   const handlePurchase = () => {
     const newTicket = {
@@ -189,82 +208,81 @@ const Main = () => {
     };
     
     setTickets(prev => [...prev, newTicket]);
-    
-    // Show success message
     alert(t.purchaseCompleted);
     setSelectedEvent(null);
-    
-    // Reset form
     setPurchaseForm({ name: '', email: '', phone: '', quantity: 1 });
   };
 
-  // Function to handle cart updates from BooksShop
   const handleCartUpdate = (newCartCount) => {
     setCartCount(newCartCount);
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
       <EnhancedBackground />
       <FloatingParticles />
       
-      {/* Navigation - Framer Motion removed */}
-      <div className="transform translate-y-0 opacity-100 transition-all duration-800 ease-out">
+      {/* Enhanced Navigation */}
+      <div className="relative z-50">
         <Navigation 
           currentView={currentView}
           onViewChange={setCurrentView}
           speaker={speaker}
           ticketCount={tickets.length}
-          cartCount={cartCount} // Pass cart count to navigation
+          cartCount={cartCount}
         />
       </div>
 
-      {/* Hero Section - only show on profile view, Framer Motion removed */}
-      {currentView === 'profile' && (
-        <div className="relative z-10 pt-0 pb-12 opacity-100 transition-opacity duration-1000">
-      
-        </div>
-      )}
-      
-      {/* Main Content - Framer Motion removed */}
-      <div className={`relative z-10 opacity-100 transform translate-y-0 transition-all duration-800 ${currentView === 'profile' ? 'max-w-6xl mx-0 px-0 pb-16' : ''}`}>
-        {/* Simple view transitions using CSS classes instead of AnimatePresence */}
+      {/* Main Content Container with consistent spacing */}
+      <div className="relative z-10">
+        {/* Profile View */}
         {currentView === 'profile' && (
-          <div className="opacity-100 transform translate-x-0 transition-all duration-500 space-y-8">
-            <Card padding="p-0" className="overflow-hidden backdrop-blur-sm bg-white/90 border-white/20 shadow-2xl">
-            
-              <div className="p-8 px-0">
-               {/* <SpeakerBio bio={speaker.bio} /> */}
-                <SpeakerBio bio={speaker.bio} />
-                <div className="grid md:grid-cols-2 gap-8 mt-8">
-                  
-                  <ContactInfo speaker={speaker} />
-                  <SpecialtiesList specialties={speaker.specialties} />
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="space-y-8">
+              {/* Profile Header Card */}
+              <Card padding="p-0" className="overflow-hidden backdrop-blur-xl bg-white/90 border-white/20 shadow-2xl rounded-3xl">
+                <div className="p-8">
+                  <SpeakerBio bio={speaker.bio} />
+                  <div className="grid md:grid-cols-2 gap-8 mt-8">
+                    <ContactInfo speaker={speaker} />
+                    <SpecialtiesList specialties={speaker.specialties} />
+                  </div>
                 </div>
+              </Card>
+              
+              {/* Testimonials Section */}
+              <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8">
+                <TestimonialsSection testimonials={speaker.testimonials} />
               </div>
-            </Card>
-            <TestimonialsSection testimonials={speaker.testimonials} />
+            </div>
           </div>
         )}
         
+        {/* Events View */}
         {currentView === 'events' && (
-          <div className="opacity-100 transform translate-x-0 transition-all duration-500">
-            <EventsList events={events} onRegister={setSelectedEvent} />
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8">
+              <EventsList events={events} onRegister={setSelectedEvent} />
+            </div>
           </div>
         )}
         
+        {/* Tickets View */}
         {currentView === 'tickets' && (
-          <div className="opacity-100 transform translate-x-0 transition-all duration-500">
-            <TicketsList 
-              tickets={tickets}
-              onDownload={(ticket) => alert(`${t.downloadTicket}: ${ticket.id}`)}
-              onBrowseEvents={() => setCurrentView('events')}
-            />
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8">
+              <TicketsList 
+                tickets={tickets}
+                onDownload={(ticket) => alert(`${t.downloadTicket}: ${ticket.id}`)}
+                onBrowseEvents={() => setCurrentView('events')}
+              />
+            </div>
           </div>
         )}
 
+        {/* Shop View - Full width like BooksShop */}
         {currentView === 'shop' && (
-          <div className="opacity-100 transform translate-x-0 transition-all duration-500 w-full">
+          <div className="w-full">
             <BooksShop 
               speaker={speaker} 
               onCartUpdate={handleCartUpdate}
@@ -273,43 +291,46 @@ const Main = () => {
         )}
       </div>
 
-      {/* Modal - Simplified without heavy Framer animations */}
+      {/* Enhanced Modal */}
       {selectedEvent && (
         <Modal
           isOpen={!!selectedEvent}
           onClose={() => setSelectedEvent(null)}
           title={t.registerForEvent}
         >
-          <div className="opacity-100 transform translate-y-0 transition-all duration-300">
-            <div className="mb-6">
-              <h3 className="text-xl font-semibold mb-4 text-gray-800 opacity-100 transition-opacity delay-100">
+          <div className="space-y-6">
+            {/* Event Details */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl border border-blue-100">
+              <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 {selectedEvent?.title}
               </h3>
               <EventDetails event={selectedEvent} />
             </div>
             
-            <div className="opacity-100 transform translate-y-0 transition-all delay-200 duration-300">
+            {/* Purchase Form */}
+            <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-lg">
               <PurchaseForm 
                 formData={purchaseForm}
-                onChange={setPurchaseForm}
+                onChange={handleFormChange}
                 event={selectedEvent}
               />
             </div>
             
-            <div className="flex space-x-4 mt-6 opacity-100 transform translate-y-0 transition-all delay-300 duration-300">
+            {/* Action Buttons */}
+            <div className="flex space-x-4 pt-4">
               <Button 
                 variant="outline" 
                 onClick={() => setSelectedEvent(null)}
-                className="flex-1 hover:scale-105 transition-transform duration-200"
+                className="flex-1 py-3 px-6 rounded-2xl border-2 border-neutral-300 hover:border-neutral-400 transition-all duration-200 hover:scale-105 font-semibold"
               >
                 {t.cancel}
               </Button>
               <Button 
                 onClick={handlePurchase}
-                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 hover:scale-105 transition-all duration-200"
+                className="flex-1 py-3 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl font-semibold"
               >
-                <div className="flex items-center justify-center hover:scale-105 transition-transform duration-150">
-                  <CheckCircle className="w-5 h-5 mr-2" />
+                <div className="flex items-center justify-center gap-2">
+                  <CheckCircle className="w-5 h-5" />
                   {t.purchaseTickets}
                 </div>
               </Button>
@@ -318,6 +339,7 @@ const Main = () => {
         </Modal>
       )}
       
+      {/* ChatBot and Footer */}
       <ChatBot />
       <SocialFooter />  
     </div>
