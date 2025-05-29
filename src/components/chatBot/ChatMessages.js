@@ -1,5 +1,4 @@
-// File: app/components/layout/ChatBot/ChatMessages.jsx
-import { Clock, Brain, Target, TrendingUp } from 'lucide-react';
+import { Clock, Brain, Target, TrendingUp, ChevronDown, ChevronUp, BarChart2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import { chatBubbleVariants, typingIndicatorVariants } from './animations';
@@ -10,58 +9,21 @@ export default function ChatMessages({
   chatEndRef, 
   chatScrollRef, 
   serviceContext, 
-  insights 
+  insights,
+  currentDetection,
+  detectionHistory
 }) {
   // Format message content with markdown support
   const formatMessageContent = (content) => {
     return (
       <ReactMarkdown
         components={{
-          strong: ({ node, ...props }) => (
-            <span className="font-semibold text-blue-300" {...props} />
-          ),
-          h1: ({ node, ...props }) => (
-            <h1 className="text-xl font-bold mb-3 text-white" {...props} />
-          ),
-          h2: ({ node, ...props }) => (
-            <h2 className="text-lg font-bold mb-2 text-white" {...props} />
-          ),
-          h3: ({ node, ...props }) => (
-            <h3 className="text-md font-bold mb-2 text-white" {...props} />
-          ),
-          p: ({ node, children, ...props }) => {
-            // Handle paragraphs with better spacing and line break preservation
-            return (
-              <p className="mb-3 leading-relaxed" {...props}>
-                {children}
-              </p>
-            );
-          },
-          ul: ({ node, ...props }) => (
-            <ul className="list-disc pl-4 mb-3 space-y-1" {...props} />
-          ),
-          li: ({ node, ...props }) => (
-            <li className="mb-1 leading-relaxed" {...props} />
-          ),
-          hr: ({ node, ...props }) => (
-            <hr className="my-4 border-gray-600" {...props} />
-          ),
-          // Handle code blocks
-          code: ({ node, inline, ...props }) => (
-            inline ? (
-              <code className="bg-gray-800 text-blue-300 px-1 py-0.5 rounded text-sm" {...props} />
-            ) : (
-              <code className="block bg-gray-800 text-blue-300 p-2 rounded mb-2 text-sm overflow-x-auto" {...props} />
-            )
-          ),
-          // Handle blockquotes
-          blockquote: ({ node, ...props }) => (
-            <blockquote className="border-l-4 border-blue-400 pl-4 italic text-gray-300 mb-3" {...props} />
-          ),
-          // Handle line breaks
-          br: ({ node, ...props }) => (
-            <br className="mb-1" {...props} />
-          ),
+          p: ({children}) => <p className="mb-2 last:mb-0">{children}</p>,
+          strong: ({children}) => <strong className="font-semibold">{children}</strong>,
+          em: ({children}) => <em className="italic">{children}</em>,
+          ul: ({children}) => <ul className="list-disc list-inside mb-2 last:mb-0">{children}</ul>,
+          ol: ({children}) => <ol className="list-decimal list-inside mb-2 last:mb-0">{children}</ol>,
+          li: ({children}) => <li className="mb-1">{children}</li>,
         }}
       >
         {content}
@@ -69,170 +31,166 @@ export default function ChatMessages({
     );
   };
 
-  // Render service context indicator for messages
-  const renderServiceContextIndicator = (messageServiceContext, detectedService) => {
-    const context = messageServiceContext || detectedService;
-    if (!context) return null;
-
-    // Handle both string and object contexts
-    const contextName = typeof context === 'string' ? context : context.currentService || 'Unknown';
+  // Render detection confidence indicator (more compact)
+  const renderConfidenceIndicator = (confidence) => {
+    if (!confidence || confidence < 0.3) return null;
+    
+    const confidencePercent = Math.round(confidence * 100);
+    let colorClass = 'text-red-400';
+    if (confidence > 0.7) colorClass = 'text-green-400';
+    else if (confidence > 0.4) colorClass = 'text-yellow-400';
 
     return (
-      <div className="flex items-center gap-1 text-xs text-blue-400 opacity-70 mt-1">
-        <Target size={10} />
-        <span>{contextName}</span>
+      <div className={`inline-flex items-center gap-1 text-xs ${colorClass} opacity-80`}>
+        <BarChart2 size={10} />
+        <span>{confidencePercent}%</span>
       </div>
     );
   };
 
-  // Render conversation insights indicator
-  const renderInsightsIndicator = (messageInsights) => {
-    if (!messageInsights || !messageInsights.insights || messageInsights.insights.length === 0) return null;
-
-    // Ensure insights is an array and contains only strings
-    const insightsArray = Array.isArray(messageInsights.insights) ? messageInsights.insights : [];
-    const validInsights = insightsArray.filter(insight => typeof insight === 'string');
-
-    if (validInsights.length === 0) return null;
-
+  // Render matched terms (more compact)
+  const renderMatchedTerms = (terms) => {
+    if (!terms || !Array.isArray(terms) || terms.length === 0) return null;
+    
     return (
-      <div className="flex items-center gap-1 text-xs text-purple-400 opacity-70 mt-1">
-        <Brain size={10} />
-        <span>{validInsights.join(', ')}</span>
+      <div className="flex flex-wrap gap-1 mt-1">
+        {terms.slice(0, 2).map((term, i) => (
+          <span key={i} className="bg-gray-600/50 px-1.5 py-0.5 rounded text-xs opacity-70">
+            {typeof term === 'object' ? term.term : term}
+          </span>
+        ))}
+        {terms.length > 2 && (
+          <span className="text-xs opacity-50">+{terms.length - 2} more</span>
+        )}
       </div>
     );
   };
 
-  // Render conversation depth indicator
-  const renderDepthIndicator = (conversationDepth) => {
-    if (!conversationDepth || conversationDepth <= 2) return null;
-
+  // Render alternative services (more compact)
+  const renderAlternativeServices = (alternatives) => {
+    if (!alternatives || alternatives.length === 0) return null;
+    
     return (
-      <div className="flex items-center gap-1 text-xs text-green-400 opacity-70 mt-1">
-        <TrendingUp size={10} />
-        <span>Depth: {conversationDepth}</span>
+      <div className="flex flex-wrap gap-1 mt-1">
+        {alternatives.slice(0, 2).map((alt, i) => (
+          <span key={i} className="bg-orange-500/20 text-orange-300 px-1.5 py-0.5 rounded text-xs">
+            {alt.service} ({Math.round(alt.confidence * 100)}%)
+          </span>
+        ))}
       </div>
     );
   };
 
   return (
-    <div 
-      className="flex-1 overflow-hidden flex flex-col relative"
-      style={{
-        background: 'linear-gradient(180deg, rgba(17, 24, 39, 0.98) 0%, rgba(17, 24, 39, 0.95) 100%)'
-      }}
-    >
-      {/* Decorative background pattern */}
-      <div className="absolute inset-0 opacity-5 pointer-events-none">
-        <div 
-          className="absolute top-0 left-0 w-full h-full" 
-          style={{
-            backgroundImage: `radial-gradient(circle at 25px 25px, rgba(255, 255, 255, 0.2) 2px, transparent 0)`,
-            backgroundSize: '50px 50px'
-          }}
-        ></div>
-      </div>
+    <div className="flex-1 overflow-hidden flex flex-col relative">
+      {/* Decorative background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-blue-900/10 to-purple-900/10" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.05),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(139,92,246,0.05),transparent_50%)]" />
 
-      {/* Service context header - shows current active service */}
+      {/* Compact service context header */}
       {serviceContext && serviceContext.currentService && (
         <div className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 border-b border-blue-500/20 p-2 z-10">
-          <div className="flex items-center justify-center gap-2 text-sm text-blue-300">
-            <Target size={14} />
-            <span>Current Focus: {serviceContext.currentService}</span>
-            {serviceContext.conversationDepth > 3 && (
-              <span className="bg-blue-500/20 text-blue-300 px-2 py-1 rounded-full text-xs ml-2">
-                Deep Discussion
-              </span>
-            )}
+          <div className="flex items-center justify-center gap-2 text-xs text-blue-300">
+            <Target size={12} />
+            <span>Focus: {serviceContext.currentService}</span>
+            {currentDetection?.confidence && renderConfidenceIndicator(currentDetection.confidence)}
           </div>
         </div>
       )}
 
-      {/* Conversation insights banner */}
+      {/* Compact conversation insights banner */}
       {insights && insights.insights && insights.insights.length > 0 && (
-        <div className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 border-b border-purple-500/20 p-2 z-10">
-          <div className="flex items-center justify-center gap-2 text-sm text-purple-300">
-            <Brain size={14} />
-            <span>{insights.insights.join(' • ')}</span>
+        <div className="bg-gradient-to-r from-purple-900/20 to-blue-900/20 border-b border-purple-500/20 p-1.5 z-10">
+          <div className="flex items-center justify-center gap-2 text-xs text-purple-300">
+            <Brain size={10} />
+            <span>{insights.insights[0]}</span>
           </div>
         </div>
       )}
     
-      {/* Actual scrollable messages container */}
+      {/* Scrollable messages container with better spacing */}
       <div 
         ref={chatScrollRef}
-        className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent p-4 z-10" 
-        style={{ 
-          overscrollBehavior: 'contain',
-          scrollbarWidth: 'thin',
-          scrollbarColor: 'rgba(75, 85, 99, 0.5) transparent'
+        className="flex-1 overflow-y-auto scrollbar-thin px-3 py-2 z-10"
+        style={{
+          // Ensure messages are properly spaced and don't get cut off
+          paddingBottom: '60px' // Extra space at bottom to prevent last message from being obscured
         }}
       >
-        {messages.map((msg, index) => (
-          <motion.div 
-            key={index}
-            variants={chatBubbleVariants}
-            initial="initial"
-            animate="animate"
-            className={`mb-4 ${msg.role === 'user' ? 'flex justify-end' : 'flex justify-start'}`}
-          >
-            <div 
-              className={`px-4 py-3 rounded-2xl max-w-[85%] shadow-md relative ${
-                msg.role === 'user' 
-                  ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-br-none border border-blue-500' 
-                  : 'bg-gradient-to-br from-gray-700 to-gray-800 text-gray-100 rounded-bl-none border border-gray-600'
-              }`}
-              style={
-                msg.role === 'user'
-                  ? { boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)' }
-                  : { boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)' }
-              }
+        {messages && messages.length > 0 ? (
+          messages.map((msg, index) => (
+            <motion.div 
+              key={`${index}-${msg.timestamp || Date.now()}`}
+              variants={chatBubbleVariants}
+              initial="initial"
+              animate="animate"
+              className={`mb-3 ${msg.role === 'user' ? 'flex justify-end' : 'flex justify-start'}`}
             >
-              {/* Enhanced service context indicator for messages with detected service */}
-              {(msg.serviceContext || msg.detectedService) && (
-                <div className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs px-1 py-0.5 rounded-full opacity-60">
-                  <Target size={8} />
+              <div className={`px-3 py-2.5 rounded-2xl max-w-[85%] shadow-sm relative ${
+                msg.role === 'user' 
+                  ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-br-none' 
+                  : 'bg-gradient-to-br from-gray-700 to-gray-800 text-gray-100 rounded-bl-none'
+              }`}>
+                {/* Message content */}
+                <div className="text-sm leading-relaxed">
+                  {formatMessageContent(msg.content)}
                 </div>
-              )}
-
-              {formatMessageContent(msg.content)}
-              
-              {/* Message metadata section */}
-              <div className="mt-2 space-y-1">
-                {/* Service context indicator */}
-                {renderServiceContextIndicator(msg.serviceContext, msg.detectedService)}
                 
-                {/* Conversation insights */}
-                {renderInsightsIndicator(msg.insights)}
-                
-                {/* Conversation depth */}
-                {renderDepthIndicator(msg.conversationDepth)}
-                
-                {/* Confidence and matched terms for user messages */}
-                {msg.role === 'user' && msg.confidence && (
-                  <div className="flex items-center gap-2 text-xs opacity-50">
-                    {msg.confidence > 0.7 && (
-                      <span className="text-green-400">High confidence</span>
+                {/* Compact metadata section */}
+                <div className="flex items-center justify-between mt-2 text-xs opacity-60">
+                  <div className="flex items-center gap-2">
+                    {/* Service context */}
+                    {msg.serviceContext && (
+                      <div className="flex items-center gap-1">
+                        <Target size={8} />
+                        <span className="truncate max-w-[80px]">{msg.serviceContext}</span>
+                      </div>
                     )}
-                    {msg.matchedTerms && Array.isArray(msg.matchedTerms) && msg.matchedTerms.length > 0 && (
-                      <span className="text-yellow-400">
-                        Matched: {msg.matchedTerms.slice(0, 2).join(', ')}
-                      </span>
+                    
+                    {/* Detection confidence */}
+                    {msg.enhancedDetection?.confidence > 0.3 && (
+                      renderConfidenceIndicator(msg.enhancedDetection.confidence)
                     )}
                   </div>
-                )}
-
-                {/* Timestamp */}
-                {msg.timestamp && (
-                  <div className="flex items-center text-xs opacity-60 mt-1">
-                    <Clock size={10} className="mr-1" />
-                    {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </div>
+                  
+                  {/* Timestamp */}
+                  {msg.timestamp && (
+                    <div className="flex items-center gap-1">
+                      <Clock size={8} />
+                      <span>{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Expandable detection details (only show for development or when explicitly needed) */}
+                {process.env.NODE_ENV === 'development' && msg.enhancedDetection && (
+                  <details className="mt-2">
+                    <summary className="text-xs text-gray-400 cursor-pointer hover:text-gray-300">
+                      Detection Details
+                    </summary>
+                    <div className="mt-1 space-y-1">
+                      {renderMatchedTerms(msg.enhancedDetection.matchedTerms)}
+                      {renderAlternativeServices(msg.enhancedDetection.alternativeServices)}
+                      {msg.enhancedDetection.detectionMethod && (
+                        <div className="text-xs text-gray-500">
+                          Method: {msg.enhancedDetection.detectionMethod}
+                        </div>
+                      )}
+                    </div>
+                  </details>
                 )}
               </div>
+            </motion.div>
+          ))
+        ) : (
+          <div className="flex items-center justify-center h-full text-gray-400">
+            <div className="text-center">
+              <Brain size={24} className="mx-auto mb-2 opacity-50" />
+              <p className="text-sm">Start a conversation...</p>
             </div>
-          </motion.div>
-        ))}
+          </div>
+        )}
         
         {/* Typing indicator */}
         <AnimatePresence>
@@ -242,23 +200,24 @@ export default function ChatMessages({
               initial="initial"
               animate="animate"
               exit="initial"
-              className="flex items-center mb-4"
+              className="flex items-center mb-3"
             >
-              <div className="px-4 py-3 bg-gradient-to-br from-gray-700 to-gray-800 rounded-2xl rounded-bl-none inline-flex items-center border border-gray-600 shadow-md">
+              <div className="px-3 py-2.5 bg-gradient-to-br from-gray-700 to-gray-800 rounded-2xl rounded-bl-none inline-flex items-center border border-gray-600 shadow-sm">
                 <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" 
+                  <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce" 
                        style={{ animationDelay: '0ms', animationDuration: '1.2s' }} />
-                  <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" 
+                  <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce" 
                        style={{ animationDelay: '150ms', animationDuration: '1.2s' }} />
-                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" 
+                  <div className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce" 
                        style={{ animationDelay: '300ms', animationDuration: '1.2s' }} />
                 </div>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
-        
-        <div ref={chatEndRef} />
+
+        {/* Scroll target - positioned at the very bottom */}
+        <div ref={chatEndRef} className="h-4" />
       </div>
     </div>
   );
