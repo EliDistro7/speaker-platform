@@ -448,7 +448,7 @@ export default function ChatBot() {
   }, [serviceContext]);
   
   return (
-    <div className="fixed bottom-6 right-6 z-40 sm:z-40" ref={containerRef}>
+    <div className="fixed  bottom-6 right-6 z-50 sm:z-40" ref={containerRef}>
       {!isChatOpen && (
         <FloatingButton onClick={handleOpenChat} />
       )}
