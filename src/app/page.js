@@ -232,10 +232,12 @@ const Main = () => {
         {currentView === 'profile' && (
           <div className="opacity-100 transform translate-x-0 transition-all duration-500 space-y-8">
             <Card padding="p-0" className="overflow-hidden backdrop-blur-sm bg-white/90 border-white/20 shadow-2xl">
-              <ProfileBanner speaker={speaker} language={language} />
+            
               <div className="p-8 px-0">
                {/* <SpeakerBio bio={speaker.bio} /> */}
+                <SpeakerBio bio={speaker.bio} />
                 <div className="grid md:grid-cols-2 gap-8 mt-8">
+                  
                   <ContactInfo speaker={speaker} />
                   <SpecialtiesList specialties={speaker.specialties} />
                 </div>

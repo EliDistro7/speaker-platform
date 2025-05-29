@@ -1,10 +1,9 @@
-
 import { useLanguage } from '@/contexts/language';
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Star, Plus, Minus, Filter, Search, BookOpen, Package, Heart, Eye, Zap, X } from 'lucide-react';
-import {sampleBooks} from './data';
-import {translations} from './data';
-
+import { ShoppingCart, Star, Filter, Search, BookOpen, Package, Heart, Eye, Zap } from 'lucide-react';
+import { sampleBooks } from './data';
+import { translations } from './data';
+import CartModal from './CartModal'; // Import the CartModal component
 
 export const BooksShop = () => {
   const { language } = useLanguage();
@@ -98,22 +97,6 @@ export const BooksShop = () => {
         )
       );
     }
-  };
-
-  const getTotalPrice = () => {
-    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
-  };
-
-  const getSubtotal = () => {
-    return getTotalPrice();
-  };
-
-  const getShippingCost = () => {
-    return getTotalPrice() > 50 ? 0 : 5.99;
-  };
-
-  const getFinalTotal = () => {
-    return getSubtotal() + getShippingCost();
   };
 
   const handleCheckout = () => {
@@ -355,118 +338,15 @@ export const BooksShop = () => {
         )}
       </div>
 
-      {/* Enhanced Cart Modal */}
-      {showCart && (
-        <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4"
-          onClick={() => setShowCart(false)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden"
-          >
-            {/* Cart Header */}
-            <div className="flex items-center justify-between p-6 border-b border-neutral-200">
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                {t.cart} ({cart.reduce((sum, item) => sum + item.quantity, 0)} items)
-              </h2>
-              <button
-                onClick={() => setShowCart(false)}
-                className="p-2 hover:bg-neutral-100 rounded-xl transition-colors"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-
-            {/* Cart Content */}
-            <div className="max-h-96 overflow-y-auto p-6">
-              {cart.length === 0 ? (
-                <div className="text-center py-12">
-                  <ShoppingCart className="h-16 w-16 text-neutral-400 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-neutral-600 mb-2">{t.cartEmpty}</h3>
-                  <p className="text-neutral-500">{t.continueReading}</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {cart.map((item) => (
-                    <div key={item.id} className="flex items-center gap-4 p-4 bg-neutral-50 rounded-2xl">
-                      <img
-                        src={item.image}
-                        alt={item.title}
-                        className="w-16 h-20 object-cover rounded-xl"
-                      />
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-neutral-900 line-clamp-1">{item.title}</h4>
-                        <p className="text-neutral-600 text-sm">{item.author}</p>
-                        <p className="font-bold text-indigo-600">${item.price}</p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <button
-                          onClick={() => updateCartQuantity(item.id, item.quantity - 1)}
-                          className="p-2 hover:bg-white rounded-xl transition-colors"
-                        >
-                          <Minus className="h-4 w-4" />
-                        </button>
-                        <span className="font-semibold min-w-[2rem] text-center">{item.quantity}</span>
-                        <button
-                          onClick={() => updateCartQuantity(item.id, item.quantity + 1)}
-                          className="p-2 hover:bg-white rounded-xl transition-colors"
-                        >
-                          <Plus className="h-4 w-4" />
-                        </button>
-                      </div>
-                      <button
-                        onClick={() => updateCartQuantity(item.id, 0)}
-                        className="p-2 hover:bg-red-100 text-red-600 rounded-xl transition-colors"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Cart Footer */}
-            {cart.length > 0 && (
-              <div className="border-t border-neutral-200 p-6 bg-neutral-50">
-                <div className="space-y-3 mb-6">
-                  <div className="flex justify-between text-neutral-600">
-                    <span>{t.subtotal}:</span>
-                    <span>${getSubtotal().toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-neutral-600">
-                    <span>{t.shipping}:</span>
-                    <span>{getShippingCost() === 0 ? t.free : `${getShippingCost().toFixed(2)}`}</span>
-                  </div>
-                  <div className="flex justify-between text-xl font-bold text-neutral-900 pt-3 border-t border-neutral-300">
-                    <span>{t.total}:</span>
-                    <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                      ${getFinalTotal().toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setShowCart(false)}
-                    className="flex-1 py-3 px-4 bg-neutral-200 text-neutral-700 rounded-2xl font-semibold hover:bg-neutral-300 transition-colors"
-                  >
-                    {t.backToShopping}
-                  </button>
-                  <button
-                    onClick={handleCheckout}
-                    className="flex-1 py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-semibold hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-300"
-                  >
-                    {t.checkout}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Cart Modal Component */}
+      <CartModal
+        showCart={showCart}
+        setShowCart={setShowCart}
+        cart={cart}
+        updateCartQuantity={updateCartQuantity}
+        handleCheckout={handleCheckout}
+        translations={translations}
+      />
     </div>
   );
 };
-
