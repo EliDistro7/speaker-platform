@@ -223,3 +223,6 @@ export const PurchaseForm = React.memo(({ formData, onChange, event }) => {
     </div>
   );
 });
+
+// Add display name for better debugging
+PurchaseForm.displayName = 'PurchaseForm';
