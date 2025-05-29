@@ -100,7 +100,7 @@ export const ContactInfo = ({ speaker }) => {
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
-      className="mb-8 relative bg-transparent backdrop-blur-lg p-4 sm:p-6 md:p-8 rounded-xl shadow-lg border border-white/20 overflow-hidden"
+      className="mb-8 relative  p-4 sm:p-6 md:p-8 rounded-xl shadow-lg border border-white/20 overflow-hidden"
     >
       {/* Header Section */}
       <motion.div 

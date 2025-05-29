@@ -258,72 +258,9 @@ export const TestimonialsSection = ({
       </motion.div>
 
       {/* Filters and Controls */}
-      {showFilters && (
-        <motion.div
-          className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0"
-          initial={animated ? { opacity: 0, y: 20 } : {}}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.5 }}
-        >
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="text-sm font-medium text-neutral-600">{t.filterBy}:</span>
-            {filterOptions.map((option) => (
-              <Badge
-                key={option.key}
-                variant={filter === option.key ? 'primary' : 'gray'}
-                interactive={true}
-                animated={true}
-                icon={option.icon}
-                onClick={() => setFilter(option.key)}
-                className="cursor-pointer"
-              >
-                {option.label}
-              </Badge>
-            ))}
-          </div>
+   
 
-          <div className="flex items-center space-x-4">
-            {/* Sort Dropdown */}
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="px-3 py-2 rounded-lg border border-neutral-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {sortOptions.map(option => (
-                <option key={option.key} value={option.key}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-
-            {/* View Toggle */}
-            {showViewToggle && (
-              <div className="flex items-center bg-neutral-100 rounded-lg p-1">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-md transition-all duration-200 ${
-                    viewMode === 'grid'
-                      ? `bg-gradient-to-r ${variantStyle.accent} text-white shadow-sm`
-                      : 'text-neutral-600 hover:text-neutral-800'
-                  }`}
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-md transition-all duration-200 ${
-                    viewMode === 'list'
-                      ? `bg-gradient-to-r ${variantStyle.accent} text-white shadow-sm`
-                      : 'text-neutral-600 hover:text-neutral-800'
-                  }`}
-                >
-                  <List className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-          </div>
-        </motion.div>
-      )}
+      
 
       {/* Results Info */}
       <motion.div
