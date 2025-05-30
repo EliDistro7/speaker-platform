@@ -434,8 +434,23 @@ const handleMessageSend = () => {
         chatbotData,
         detectedLang,
         updatedServiceContext,
-        pricingData
+        pricingData,
+
       );
+
+      // ADD THIS:
+     // Update service context with last response for contextual follow-ups
+     const contextWithLastResponse = {
+        ...updatedServiceContext,
+  lastResponse: {
+    type: generatedResponse.type,
+    service: generatedResponse.service,
+    text: generatedResponse.text,
+    timestamp: new Date().toISOString()
+  }
+};
+
+setServiceContext(contextWithLastResponse);
       
       // Validate the generated response
       if (!validateResponse(generatedResponse)) {
@@ -610,6 +625,20 @@ setSuggestions(finalSuggestions);
         enhancedDetection: enhancedServiceDetection,
         detectionSummary: getDetectionSummary(enhancedServiceDetection)
       };
+
+      // ADD THIS BEFORE the setChatMessages call:
+// Update service context with fallback response info
+const fallbackContextWithLastResponse = {
+  ...updatedServiceContext,
+  lastResponse: {
+    type: 'fallback',
+    service: enhancedServiceDetection.service,
+    text: finalResponse,
+    timestamp: new Date().toISOString()
+  }
+};
+
+setServiceContext(fallbackContextWithLastResponse);
       
       // **NEW: Add fallback message using conversation manager**
       setChatMessages(prev => {
@@ -648,7 +677,6 @@ setSuggestions(fallbackSuggestions.length > 0 ?
     setIsTyping(false);
   }, 1500);
 };
-
 // **NEW: Additional helper functions for conversation management integration**
 
 // Function to handle conversation export

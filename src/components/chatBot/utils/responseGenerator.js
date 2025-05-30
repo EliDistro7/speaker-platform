@@ -41,6 +41,16 @@ const casualAnalysis = analyzeCasualInteraction(userMessage, language);
 if (casualAnalysis.isCasualInteraction) {
   return generateCasualResponse(casualAnalysis, serviceContext, language);
   }
+
+// Priority 0.5: Handle contextual follow-ups (yes/no, tell me more)
+if (intentAnalysis.isContextualResponse) {
+  const contextualResponse = generateContextualFollowUp(serviceContext, intentAnalysis, chatbotData, language);
+  if (contextualResponse) {
+    return contextualResponse;
+  }
+}
+
+
   // Priority 1: Handle contact requests
   if (intentAnalysis.isContactRequest) {
     return generateContactResponse(serviceContext, chatbotData, language);
@@ -436,6 +446,31 @@ export function analyzeMessageIntent(message, language) {
       'kipaumbele', 'mbio'
     ]
   };
+
+  // Add to existing indicator objects around line 350-400
+const confirmationIndicators = {
+  en: [
+    'yes', 'yeah', 'yep', 'sure', 'okay', 'ok', 'alright', 'definitely',
+    'absolutely', 'of course', 'please', 'go ahead', 'continue'
+  ],
+  sw: [
+    'ndiyo', 'ndio', 'sawa', 'haya', 'kabisa', 'bila shaka', 
+    'endelea', 'karibu', 'haya basi'
+  ]
+};
+
+const elaborationIndicators = {
+  en: [
+    'tell me more', 'more details', 'explain more', 'elaborate', 
+    'go deeper', 'what else', 'continue', 'more info', 'expand',
+    'tell me about', 'how can i start', 'how do i begin', 'what next'
+  ],
+  sw: [
+    'niambie zaidi', 'maelezo zaidi', 'eleza zaidi', 'endelea',
+    'nini kingine', 'habari zaidi', 'jinsi ya kuanza', 'nitaanzaje',
+    'hatua ya kwanza', 'nini kifuatacho'
+  ]
+};
   
   const langContactIndicators = contactIndicators[language] || contactIndicators['en'];
   const langLocationIndicators = locationIndicators[language] || locationIndicators['en'];
@@ -444,6 +479,10 @@ export function analyzeMessageIntent(message, language) {
   const langServiceIndicators = serviceIndicators[language] || serviceIndicators['en'];
   const langBookingIndicators = bookingIndicators[language] || bookingIndicators['en'];
   const langUrgencyIndicators = urgencyIndicators[language] || urgencyIndicators['en'];
+
+    const langConfirmationIndicators = confirmationIndicators[language] || confirmationIndicators['en'];
+const langElaborationIndicators = elaborationIndicators[language] || elaborationIndicators['en'];
+
   
   const isContactRequest = langContactIndicators.some(indicator => messageText.includes(indicator));
   const isLocationRequest = langLocationIndicators.some(indicator => messageText.includes(indicator));
@@ -452,6 +491,14 @@ export function analyzeMessageIntent(message, language) {
   const isServiceInquiry = langServiceIndicators.some(indicator => messageText.includes(indicator));
   const isBookingRequest = langBookingIndicators.some(indicator => messageText.includes(indicator));
   const isUrgent = langUrgencyIndicators.some(indicator => messageText.includes(indicator));
+
+
+const isConfirmation = langConfirmationIndicators.some(indicator => 
+  messageText === indicator || messageText.startsWith(indicator)
+);
+const isElaborationRequest = langElaborationIndicators.some(indicator => 
+  messageText.includes(indicator)
+);
   
   // Enhanced specific patterns for location/contact queries
   const locationContactPatterns = {
@@ -568,6 +615,11 @@ export function analyzeMessageIntent(message, language) {
     confidence,
     intentStrength,
     
+
+    isConfirmation,
+    isElaborationRequest,
+    isContextualResponse: isConfirmation || isElaborationRequest,
+    
     // Pattern matching results
     matchedLocationPattern: matchesLocationContactPattern,
     matchedServicePattern: matchesServicePattern,
@@ -683,6 +735,127 @@ function calculateIntentConfidence(messageText, primaryIntent, language) {
   
   return Math.min(matchCount / Math.max(words.length * 0.3, 1), 1.0);
 }
+
+
+/**
+ * Generate contextual follow-up response based on previous conversation
+ * @param {Object} serviceContext - Current service context
+ * @param {Object} intentAnalysis - Intent analysis result
+ * @param {Object} chatbotData - Chatbot configuration data
+ * @param {string} language - Current language
+ * @returns {Object} Contextual response
+ */
+function generateContextualFollowUp(serviceContext, intentAnalysis, chatbotData, language) {
+  const { lastResponse, currentService, conversationDepth } = serviceContext;
+  
+  if (intentAnalysis.isConfirmation && lastResponse?.type) {
+    // Handle "yes" responses based on last response type
+    switch (lastResponse.type) {
+      case 'service':
+        return generateServiceElaboration(currentService, chatbotData, language);
+      case 'pricing':
+        return generatePricingElaboration(currentService, language);
+      case 'contact':
+        return generateContactElaboration(chatbotData, language);
+      default:
+        return generateGeneralElaboration(serviceContext, language);
+    }
+  }
+  
+  if (intentAnalysis.isElaborationRequest) {
+    if (currentService) {
+      return generateServiceElaboration(currentService, chatbotData, language);
+    }
+    return generateGeneralGuidance(serviceContext, language);
+  }
+  
+  return null;
+}
+
+/**
+ * Generate detailed service information
+ */
+function generateServiceElaboration(service, chatbotData, language) {
+  const elaborationContent = language === 'sw' ? 
+    `📚 MAELEZO ZAIDI KUHUSU ${service.toUpperCase()}:\n\n` +
+    `🎯 Lengo: Kukuwezesha kupata ujuzi wa uongozi wa hali ya juu\n` +
+    `⏱️ Muda: Kulingana na mahitaji yako\n` +
+    `👥 Kwa: Viongozi na wanaotaka kuongoza\n\n` +
+    `💡 Je, ungependa kujua zaidi kuhusu:\n` +
+    `• Jinsi ya kuanza\n• Bei na mipango ya malipo\n• Mfumo wa masomo` :
+    
+    `📚 MORE DETAILS ABOUT ${service.toUpperCase()}:\n\n` +
+    `🎯 Purpose: To help you develop high-level leadership skills\n` +
+    `⏱️ Duration: Based on your needs\n` +
+    `👥 For: Current and aspiring leaders\n\n` +
+    `💡 Would you like to know more about:\n` +
+    `• How to get started\n• Pricing and payment plans\n• Course structure`;
+
+  return {
+    text: elaborationContent,
+    type: 'service_elaboration',
+    service: service,
+    metadata: { elaborationType: 'service_details' }
+  };
+}
+
+/**
+ * Generate pricing elaboration
+ */
+function generatePricingElaboration(service, language) {
+  const pricingDetails = language === 'sw' ? 
+    `💰 MAELEZO ZAIDI YA BEI:\n\n` +
+    `📊 Tunayo mipango tofauti:\n` +
+    `• Mafunzo ya binafsi\n• Vikundi vidogo\n• Mipango ya kampuni\n\n` +
+    `💳 Malipo:\n` +
+    `• Malipo ya mara moja\n• Malipo kwa awamu\n• Mipango maalum\n\n` +
+    `📞 Wasiliana nasi kwa bei maalum yako.` :
+    
+    `💰 DETAILED PRICING INFORMATION:\n\n` +
+    `📊 We offer different packages:\n` +
+    `• Individual training\n• Small groups\n• Corporate packages\n\n` +
+    `💳 Payment options:\n` +
+    `• One-time payment\n• Installment plans\n• Custom arrangements\n\n` +
+    `📞 Contact us for your personalized quote.`;
+
+  return {
+    text: pricingDetails,
+    type: 'pricing_elaboration',
+    service: service,
+    metadata: { elaborationType: 'pricing_details' }
+  };
+}
+
+/**
+ * Generate general guidance for getting started
+ */
+function generateGeneralGuidance(serviceContext, language) {
+  const guidanceContent = language === 'sw' ? 
+    `🚀 JINSI YA KUANZA:\n\n` +
+    `1️⃣ Chagua huduma unayohitaji\n` +
+    `2️⃣ Wasiliana nasi kwa mazungumzo\n` +
+    `3️⃣ Tupange mfumo unaokufaa\n` +
+    `4️⃣ Anza safari yako ya maendeleo\n\n` +
+    `📋 Huduma zetu kuu:\n` +
+    `• Leadership courses\n• Executive coaching\n• Keynote speaking\n\n` +
+    `❓ Je, ungependa kujua zaidi kuhusu huduma fulani?` :
+    
+    `🚀 HOW TO GET STARTED:\n\n` +
+    `1️⃣ Choose the service you need\n` +
+    `2️⃣ Contact us for consultation\n` +
+    `3️⃣ We'll design a plan that fits you\n` +
+    `4️⃣ Begin your development journey\n\n` +
+    `📋 Our main services:\n` +
+    `• Leadership courses\n• Executive coaching\n• Keynote speaking\n\n` +
+    `❓ Would you like to know more about a specific service?`;
+
+  return {
+    text: guidanceContent,
+    type: 'guidance',
+    metadata: { elaborationType: 'getting_started' }
+  };
+}
+
 
 /**
  * Validate response object structure

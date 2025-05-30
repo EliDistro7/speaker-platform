@@ -542,7 +542,8 @@ export const createFreshServiceContext = () => ({
   lastServiceMention: null,
   contextualPrompts: [],
   conversationDepth: 0,
-  conversationFlow: []
+  conversationFlow: [],
+  lastResponse: null, 
 });
 
 /**
