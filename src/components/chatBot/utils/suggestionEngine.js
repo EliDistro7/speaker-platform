@@ -466,7 +466,7 @@ export const generateFollowUpSuggestions = (
     );
   }
   
-  return suggestions.length > 0 ? suggestions : generateDefaultSuggestions(language);
+  return suggestions.length > 0 ? suggestions : getDefaultSuggestions(language);
 };
 
 /**

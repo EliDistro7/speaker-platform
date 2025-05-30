@@ -13,6 +13,9 @@ import {
   getConversationInsights
 } from '@/utils/serviceContextUtils';
 
+
+import { analyzeCasualInteraction, generateCasualResponse } from './casualInteractionUtils';
+
 /**
  * Generate contextual response based on service detection and user intent
  * @param {string} userMessage - User's message
@@ -33,6 +36,11 @@ export function generateContextualResponse(
   serviceContext, 
   pricingData
 ) {
+  // Priority 0: Handle casual interactions (greetings, goodbyes, appreciation)
+const casualAnalysis = analyzeCasualInteraction(userMessage, language);
+if (casualAnalysis.isCasualInteraction) {
+  return generateCasualResponse(casualAnalysis, serviceContext, language);
+  }
   // Priority 1: Handle contact requests
   if (intentAnalysis.isContactRequest) {
     return generateContactResponse(serviceContext, chatbotData, language);
@@ -71,8 +79,19 @@ export function generateContextualResponse(
  * @param {string} language - Current language
  * @returns {Object} Contact response
  */
+
+
+// Enhanced contact response generator that includes address information
 function generateContactResponse(serviceContext, chatbotData, language) {
   let contactResponse = getContactResponse(chatbotData.contactInfo, language);
+  
+  // Add location/address information prominently for location-based queries
+  if (serviceContext.isLocationQuery || serviceContext.matchedLocationPattern) {
+    const locationInfo = language === 'sw' ? 
+      `📍 MAHALI YETU:\n${chatbotData.contactInfo.address || 'Anwani itatolewa baadaye'}\n\n` :
+      `📍 OUR LOCATION:\n${chatbotData.contactInfo.address || 'Address will be provided'}\n\n`;
+    contactResponse = locationInfo + contactResponse;
+  }
   
   // Add service-specific contact note
   if (serviceContext.currentService) {
@@ -96,7 +115,9 @@ function generateContactResponse(serviceContext, chatbotData, language) {
     serviceContext: serviceContext.currentService,
     metadata: {
       conversationDepth: serviceContext.conversationDepth,
-      servicesDiscussed: serviceContext.serviceHistory
+      servicesDiscussed: serviceContext.serviceHistory,
+      isLocationQuery: serviceContext.isLocationQuery,
+      locationPattern: serviceContext.matchedLocationPattern
     }
   };
 }
@@ -125,7 +146,7 @@ function generateEnhancedPricingResponse(service, language, pricingData, service
   // Add comparison note if multiple services discussed
   if (serviceContext.serviceHistory.length > 1) {
     const comparisonNote = language === 'sw' ? 
-      `\n\n📊 Tunaweza kutengeneza mfurushi wa huduma kwa bei bora zaidi.` :
+      `\n\n📊 Tunaweza kutengeneza kifurushi cha huduma kwa bei bora zaidi.` :
       `\n\n📊 We can create a service package for better value.`;
     enhancedResponse += comparisonNote;
   }
@@ -295,8 +316,8 @@ function generateFallbackResponse(userMessage, intentAnalysis, chatbotData, lang
   // Add service exploration suggestion
   if (serviceContext.conversationDepth === 0) {
     const explorationNote = language === 'sw' ? 
-      `\n\n🔍 Unaweza kuuliza kuhusu huduma zetu kama vile: uongozaji wa biashara, ukuzaji wa mtandao, au ubunifu wa tovuti.` :
-      `\n\n🔍 You can ask about our services like: business consulting, digital marketing, or web development.`;
+      `\n\n🔍 Unaweza kuuliza kuhusu huduma zetu kama vile: Leadership course, Executive Coaching, or Keynote speaking.` :
+      `\n\n🔍 You can ask about our services like: Leadership course, Executive Coaching, or Keynote speaking.`;
     enhancedFallback += explorationNote;
   }
   
@@ -318,48 +339,312 @@ function generateFallbackResponse(userMessage, intentAnalysis, chatbotData, lang
  * @param {string} language - Current language
  * @returns {Object} Intent analysis result
  */
+
+// Enhanced intent analysis to better handle location/contact queries
 export function analyzeMessageIntent(message, language) {
-  const messageText = message.toLowerCase();
+  const messageText = message.toLowerCase().trim();
+  const casualAnalysis = analyzeCasualInteraction(message, language);
   
-  // Contact intent indicators
+  // Enhanced contact intent indicators
   const contactIndicators = {
-    en: ['contact', 'call', 'email', 'phone', 'reach', 'speak', 'talk', 'meet'],
-    sw: ['wasiliana', 'piga', 'barua pepe', 'simu', 'fikia', 'ongea', 'zungumza', 'kutana']
+    en: [
+      'contact', 'call', 'email', 'phone', 'reach', 'speak', 'talk', 'meet', 
+      'find you', 'get you', 'locate you', 'get in touch', 'reach out',
+      'communicate', 'connect', 'appointment', 'schedule', 'book'
+    ],
+    sw: [
+      'wasiliana', 'piga', 'barua pepe', 'simu', 'fikia', 'ongea', 'zungumza', 
+      'kutana', 'kupata', 'mahali', 'miadi', 'ratiba', 'hifadhi',
+      'unganisha', 'kufikiana', 'mazungumzo'
+    ]
   };
   
-  // Pricing intent indicators
+  // Enhanced location/address specific indicators
+  const locationIndicators = {
+    en: [
+      'where', 'location', 'address', 'office', 'find', 'visit', 'come to', 
+      'directions', 'map', 'navigate', 'situated', 'based', 'headquarters',
+      'branch', 'premises', 'building', 'area', 'region', 'place'
+    ],
+    sw: [
+      'wapi', 'mahali', 'anwani', 'ofisi', 'pata', 'tembelea', 'kuja', 
+      'mwelekeo', 'ramani', 'elekea', 'iko', 'makao', 'tawi',
+      'jengo', 'eneo', 'mkoa', 'sehemu', 'kiwanda'
+    ]
+  };
+  
+  // Enhanced pricing intent indicators
   const pricingIndicators = {
-    en: ['price', 'cost', 'fee', 'charge', 'rate', 'budget', 'expensive', 'cheap', 'affordable'],
-    sw: ['bei', 'gharama', 'ada', 'malipo', 'kiwango', 'bajeti', 'ghali', 'rahisi', 'nafuu']
+    en: [
+      'price', 'cost', 'fee', 'charge', 'rate', 'budget', 'expensive', 'cheap', 
+      'affordable', 'pricing', 'quote', 'estimate', 'bill', 'payment',
+      'money', 'dollar', 'currency', 'value', 'worth', 'discount'
+    ],
+    sw: [
+      'bei', 'gharama', 'ada', 'malipo', 'kiwango', 'bajeti', 'ghali', 'rahisi', 
+      'nafuu', 'kipimo', 'hesabu', 'bili', 'pesa', 'dola',
+      'thamani', 'punguzo', 'ongezeko', 'kiasi'
+    ]
   };
   
-  // Information seeking indicators
+  // Enhanced information seeking indicators
   const infoIndicators = {
-    en: ['what', 'how', 'why', 'when', 'where', 'tell me', 'explain', 'describe'],
-    sw: ['nini', 'jinsi', 'kwa nini', 'lini', 'wapi', 'niambie', 'eleza', 'elezea']
+    en: [
+      'what', 'how', 'why', 'when', 'tell me', 'explain', 'describe',
+      'information', 'details', 'about', 'regarding', 'concerning',
+      'help', 'assist', 'guide', 'show', 'demonstrate'
+    ],
+    sw: [
+      'nini', 'jinsi', 'kwa nini', 'lini', 'niambie', 'eleza', 'elezea',
+      'habari', 'maelezo', 'kuhusu', 'juu ya', 'kuhusiana',
+      'msaada', 'kusaidia', 'mwongozo', 'onyesha', 'dhihirisha'
+    ]
+  };
+
+  // Service inquiry indicators
+  const serviceIndicators = {
+    en: [
+      'service', 'services', 'offer', 'provide', 'do you have', 'available',
+      'can you', 'do you do', 'specialise', 'expertise', 'capability'
+    ],
+    sw: [
+      'huduma', 'kutoa', 'una', 'unapatikana', 'unaweza', 'unafanya',
+      'utaalamu', 'uwezo', 'kipengele'
+    ]
+  };
+
+  // Booking/scheduling indicators
+  const bookingIndicators = {
+    en: [
+      'book', 'schedule', 'appointment', 'reserve', 'arrange', 'plan',
+      'meeting', 'consultation', 'session', 'slot', 'available time'
+    ],
+    sw: [
+      'hifadhi', 'ratiba', 'miadi', 'panga', 'mpango', 'mkutano',
+      'mazungumzo', 'kipindi', 'nafasi', 'wakati'
+    ]
+  };
+
+  // Urgency indicators
+  const urgencyIndicators = {
+    en: [
+      'urgent', 'emergency', 'asap', 'quickly', 'immediately', 'now',
+      'soon', 'fast', 'rush', 'priority'
+    ],
+    sw: [
+      'haraka', 'dharura', 'sasa hivi', 'upesi', 'mara moja',
+      'kipaumbele', 'mbio'
+    ]
   };
   
   const langContactIndicators = contactIndicators[language] || contactIndicators['en'];
+  const langLocationIndicators = locationIndicators[language] || locationIndicators['en'];
   const langPricingIndicators = pricingIndicators[language] || pricingIndicators['en'];
   const langInfoIndicators = infoIndicators[language] || infoIndicators['en'];
+  const langServiceIndicators = serviceIndicators[language] || serviceIndicators['en'];
+  const langBookingIndicators = bookingIndicators[language] || bookingIndicators['en'];
+  const langUrgencyIndicators = urgencyIndicators[language] || urgencyIndicators['en'];
   
   const isContactRequest = langContactIndicators.some(indicator => messageText.includes(indicator));
+  const isLocationRequest = langLocationIndicators.some(indicator => messageText.includes(indicator));
   const isPricingInquiry = langPricingIndicators.some(indicator => messageText.includes(indicator));
   const isInfoSeeking = langInfoIndicators.some(indicator => messageText.includes(indicator));
+  const isServiceInquiry = langServiceIndicators.some(indicator => messageText.includes(indicator));
+  const isBookingRequest = langBookingIndicators.some(indicator => messageText.includes(indicator));
+  const isUrgent = langUrgencyIndicators.some(indicator => messageText.includes(indicator));
   
-  // Determine primary intent
+  // Enhanced specific patterns for location/contact queries
+  const locationContactPatterns = {
+    en: [
+      /where.*can.*i.*(get|find|reach|contact).*you/i,
+      /where.*are.*you.*located/i,
+      /where.*is.*your.*(office|location|address)/i,
+      /how.*to.*find.*you/i,
+      /your.*(location|address|office)/i,
+      /directions.*to.*you/i,
+      /where.*to.*meet/i,
+      /find.*your.*place/i
+    ],
+    sw: [
+      /wapi.*naweza.*kupata/i,
+      /wapi.*mko/i,
+      /mahali.*yenu/i,
+      /anwani.*yenu/i,
+      /ofisi.*yenu.*iko.*wapi/i,
+      /mwelekeo.*wenu/i,
+      /mahali.*pa.*kukutana/i
+    ]
+  };
+
+  // Service-specific inquiry patterns
+  const servicePatterns = {
+    en: [
+      /what.*do.*you.*do/i,
+      /what.*services.*do.*you.*offer/i,
+      /can.*you.*help.*with/i,
+      /do.*you.*provide/i,
+      /are.*you.*able.*to/i
+    ],
+    sw: [
+      /mnafanya.*nini/i,
+      /huduma.*gani.*mnatoa/i,
+      /mnaweza.*kusaidia/i,
+      /mnatoa/i,
+      /mnaweza/i
+    ]
+  };
+  
+  const langLocationPatterns = locationContactPatterns[language] || locationContactPatterns['en'];
+  const langServicePatterns = servicePatterns[language] || servicePatterns['en'];
+  
+  const matchesLocationContactPattern = langLocationPatterns.some(pattern => pattern.test(messageText));
+  const matchesServicePattern = langServicePatterns.some(pattern => pattern.test(messageText));
+  
+  // Enhanced contact detection - location requests should be treated as contact requests
+  const isEnhancedContactRequest = isContactRequest || isLocationRequest || matchesLocationContactPattern || isBookingRequest;
+  
+  // Check if it's a question (using expanded question patterns)
+  const isQuestion = casualAnalysis.isQuestion;
+  
+  // Determine primary intent with better prioritization
   let primaryIntent = 'general';
-  if (isContactRequest) primaryIntent = 'contact';
-  else if (isPricingInquiry) primaryIntent = 'pricing';
-  else if (isInfoSeeking) primaryIntent = 'information';
+  let confidence = 0.5;
   
-  return {
+  if (casualAnalysis.isCasualInteraction) {
+    primaryIntent = 'casual';
+    confidence = 0.9;
+  } else if (isEnhancedContactRequest) {
+    primaryIntent = 'contact';
+    confidence = 0.85;
+  } else if (isPricingInquiry) {
+    primaryIntent = 'pricing';
+    confidence = 0.8;
+  } else if (isServiceInquiry || matchesServicePattern) {
+    primaryIntent = 'service';
+    confidence = 0.8;
+  } else if (isBookingRequest) {
+    primaryIntent = 'booking';
+    confidence = 0.85;
+  } else if (isInfoSeeking || isQuestion) {
+    primaryIntent = 'information';
+    confidence = 0.7;
+  }
+  
+  // Boost confidence for urgent requests
+  if (isUrgent) {
+    confidence = Math.min(confidence + 0.1, 1.0);
+  }
+  
+  // Calculate intent strength based on multiple indicators
+  const intentStrength = calculateIntentStrength({
     isContactRequest,
+    isLocationRequest,
     isPricingInquiry,
     isInfoSeeking,
+    isServiceInquiry,
+    isBookingRequest,
+    isUrgent,
+    matchesLocationContactPattern,
+    matchesServicePattern
+  });
+
+  return {
+    // Core intent flags
+    isContactRequest: isEnhancedContactRequest,
+    isLocationRequest,
+    isPricingInquiry,
+    isInfoSeeking,
+    isServiceInquiry,
+    isBookingRequest,
+    isUrgent,
+    isQuestion,
+    
+    // Casual interaction analysis
+    isCasualInteraction: casualAnalysis.isCasualInteraction,
+    casualType: casualAnalysis.interactionType,
+    
+    // Primary classification
     primaryIntent,
-    confidence: calculateIntentConfidence(messageText, primaryIntent, language)
+    confidence,
+    intentStrength,
+    
+    // Pattern matching results
+    matchedLocationPattern: matchesLocationContactPattern,
+    matchedServicePattern: matchesServicePattern,
+    
+    // Additional context
+    requiresImmediateAttention: isUrgent || (isBookingRequest && isUrgent),
+    suggestedAction: getSuggestedAction(primaryIntent, isUrgent, isBookingRequest),
+    
+    // Metadata for analytics
+    metadata: {
+      language,
+      messageLength: message.length,
+      hasMultipleIntents: [isContactRequest, isPricingInquiry, isServiceInquiry, isBookingRequest].filter(Boolean).length > 1,
+      detectedPatterns: {
+        location: matchesLocationContactPattern,
+        service: matchesServicePattern,
+        casual: casualAnalysis.isCasualInteraction
+      }
+    }
   };
+}
+
+
+
+/**
+ * Calculate intent strength based on multiple indicators
+ * @param {Object} indicators - Various intent indicators
+ * @returns {number} Intent strength score (0-1)
+ */
+function calculateIntentStrength(indicators) {
+  const weights = {
+    isContactRequest: 0.2,
+    isLocationRequest: 0.15,
+    isPricingInquiry: 0.15,
+    isInfoSeeking: 0.1,
+    isServiceInquiry: 0.15,
+    isBookingRequest: 0.2,
+    isUrgent: 0.1,
+    matchesLocationContactPattern: 0.25,
+    matchesServicePattern: 0.2
+  };
+  
+  let totalScore = 0;
+  let maxPossibleScore = 0;
+  
+  Object.entries(indicators).forEach(([key, value]) => {
+    if (weights[key]) {
+      maxPossibleScore += weights[key];
+      if (value) {
+        totalScore += weights[key];
+      }
+    }
+  });
+  
+  return maxPossibleScore > 0 ? totalScore / maxPossibleScore : 0;
+}
+
+/**
+ * Get suggested action based on intent analysis
+ * @param {string} primaryIntent - Primary detected intent
+ * @param {boolean} isUrgent - Whether request is urgent
+ * @param {boolean} isBooking - Whether it's a booking request
+ * @returns {string} Suggested action
+ */
+function getSuggestedAction(primaryIntent, isUrgent, isBooking) {
+  if (isUrgent && isBooking) return 'immediate_booking';
+  if (isUrgent) return 'priority_response';
+  if (isBooking) return 'schedule_appointment';
+  
+  switch (primaryIntent) {
+    case 'contact': return 'provide_contact_info';
+    case 'pricing': return 'provide_pricing';
+    case 'service': return 'explain_services';
+    case 'casual': return 'engage_casually';
+    case 'information': return 'provide_information';
+    default: return 'general_assistance';
+  }
 }
 
 /**
