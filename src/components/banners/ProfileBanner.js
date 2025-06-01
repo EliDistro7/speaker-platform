@@ -247,13 +247,13 @@ const ProfileBanner = ({ speaker, language = 'en' }) => {
                 <motion.div
                   className="relative z-10"
                   variants={floatingVariants}
-                  animate="animate"
+                  
                 >
                   <div className="aspect-[4/5] rounded-3xl overflow-hidden bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-sm border border-white/20 p-4">
                  {/* Image holder with banner.jpg */}
 <div className="w-full h-full rounded-2xl bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center overflow-hidden">
   <Image 
-    src="/banner2.jpg" 
+    src="/af.jpeg" 
     alt="Speaker Photo" 
     fill
     className="object-cover rounded-2xl"
@@ -264,7 +264,7 @@ const ProfileBanner = ({ speaker, language = 'en' }) => {
 
                 {/* Decorative elements */}
                 <motion.div
-                  className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-cyan-400/30 to-cyan-600/30 rounded-full blur-xl"
+                  className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-cyan-400/30 to-cyan-600/30 rounded-full blur-xl z-50"
                   animate={{
                     scale: [1, 1.2, 1],
                     opacity: [0.3, 0.6, 0.3]
@@ -277,7 +277,7 @@ const ProfileBanner = ({ speaker, language = 'en' }) => {
                 />
                 
                 <motion.div
-                  className="absolute -bottom-6 -left-6 w-32 h-32 bg-gradient-to-br from-blue-400/20 to-blue-600/20 rounded-full blur-xl"
+                  className="absolute -bottom-6 -left-6 w-32 h-32 bg-gradient-to-br from-blue-400/20 to-blue-600/20 rounded-full blur-xl p-50"
                   animate={{
                     scale: [1, 1.1, 1],
                     opacity: [0.2, 0.4, 0.2]
@@ -292,7 +292,7 @@ const ProfileBanner = ({ speaker, language = 'en' }) => {
 
                 {/* Rating badge */}
                 <motion.div
-                  className="absolute top-6 -left-6 bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-xl border border-white/50"
+                  className="absolute top-6 -left-6 bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-xl border border-white/50 z-20"
                   initial={{ scale: 0, rotate: -10 }}
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ delay: 1, type: "spring", stiffness: 200 }}
@@ -318,7 +318,7 @@ const ProfileBanner = ({ speaker, language = 'en' }) => {
 
                 {/* Achievement badge */}
                 <motion.div
-                  className="absolute bottom-6 -right-6 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-2xl p-4 shadow-xl"
+                  className="absolute bottom-6 -right-6 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-2xl p-4 shadow-xl z-20"
                   initial={{ scale: 0, rotate: 10 }}
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ delay: 1.2, type: "spring", stiffness: 200 }}

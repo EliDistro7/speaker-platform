@@ -175,8 +175,13 @@ export const isAskingForContact = (message, language) => {
   const lowerMsg = message.toLowerCase();
   
   const contactKeywords = {
-    en: ['contact', 'email', 'phone', 'call', 'reach', 'address', 'location', 'hours'],
-    sw: ['wasiliana', 'barua pepe', 'simu', 'piga', 'fikia', 'anwani', 'mahali', 'saa']
+    en: ['contact', 'email', 'phone', 'call', 'reach', 'address', 'location', 'hours', "nawezaje kukupata",
+            'how to contact', 'get in touch', 'where are you', 'what is your email', 'what is your phone number'],
+    
+    sw: ['wasiliana', 'barua pepe', 'simu', 'piga', 'fikia', 'anwani', 'mahali', 'saa', 
+            'namba ya simu', 'jinsi ya kuwasiliana', 'nini barua pepe yako', 'nini namba yako ya simu',
+            'unapatikana wapi', 'unaishi wapi', 'unapatikana lini'
+    ]
   };
   
   const keywords = contactKeywords[language] || contactKeywords.en;

@@ -240,6 +240,7 @@ const Main = () => {
           <div className="max-w-7xl mx-auto px-2 sm:px-2 lg:px-8 py-8">
           
               {/* Profile Header Card */}
+              <ProfileBanner />
             
                 <div className="p-4">
                   <SpeakerBio bio={speaker.bio} />

@@ -98,7 +98,7 @@ export function generateBotResponse(processedMessage, chatbotData, pricingData) 
     }
   }
   // Handle contact requests
-  else if (isAskingForContact(userMessage.content)) {
+  else if (isAskingForContact(userMessage.content, detectedLanguage)) {
     finalResponse = getContactResponse(chatbotData.contactInfo, detectedLanguage);
     responseType = 'contact';
   }

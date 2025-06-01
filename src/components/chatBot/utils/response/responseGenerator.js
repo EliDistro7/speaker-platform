@@ -20,7 +20,13 @@ import {
   generateServicesResponse,
   generatePricingResponse as generateCommonPricingResponse,
   generateMethodologyResponse,
-  generateMoreInfoResponse
+  generateMoreInfoResponse,
+  
+    generateContactResponse as generateCommonContactResponse,
+  generateTimelineResponse,
+  generateLocationResponse,
+  generateQualificationsResponse
+
 } from '@/utils/context/common-questions/index';
 
 import { 
@@ -158,70 +164,8 @@ function formatCommonQuestionResponse(commonQuestionResponse, serviceContext, la
   };
 }
 
-/**
- * Generate services overview response with context awareness
- * @param {Object} serviceContext - Current service context
- * @param {string} language - Current language
- * @returns {Object} Services response
- */
-function generateServicesOverviewResponse(serviceContext, language) {
-  const servicesResponse = generateServicesResponse(language);
-  let enhancedResponse = formatResponseForDisplay({ response: servicesResponse }, language);
-  
-  // Add context-based recommendations
-  if (serviceContext.serviceHistory.length > 0) {
-    const recommendationNote = language === 'sw' ? 
-      `\n\n🎯 Kulingana na mazungumzo yetu, huduma hizi zinaweza kukufaa zaidi: ` :
-      `\n\n🎯 Based on our conversation, these services might be most relevant for you: `;
-    
-    // Filter services based on history or context
-    const relevantServices = serviceContext.serviceHistory.slice(0, 2);
-    enhancedResponse += recommendationNote + relevantServices.join(', ');
-  }
-  
-  return {
-    text: enhancedResponse,
-    type: 'services_overview',
-    metadata: {
-      servicesCount: servicesResponse.services ? servicesResponse.services.length : 0,
-      hasContext: serviceContext.serviceHistory.length > 0
-    }
-  };
-}
 
-/**
- * Generate methodology response with service context
- * @param {string} service - Specific service (optional)
- * @param {Object} serviceContext - Current service context
- * @param {string} language - Current language
- * @returns {Object} Methodology response
- */
-function generateMethodologyOverviewResponse(service, serviceContext, language) {
-  const methodologyResponse = generateMethodologyResponse(service, language);
-  let enhancedResponse = formatResponseForDisplay({ response: methodologyResponse }, language);
-  
-  // Add service-specific methodology details if context available
-  if (serviceContext.currentService && !service) {
-    const contextualNote = language === 'sw' ? 
-      `\n\n🔍 Kwa huduma ya ${serviceContext.currentService} ambayo tumeongea nayo, mbinu ni: ` :
-      `\n\n🔍 For the ${serviceContext.currentService} service we discussed, the approach is: `;
-    
-    const specificMethodology = generateMethodologyResponse(serviceContext.currentService, language);
-    if (specificMethodology.isSpecific) {
-      enhancedResponse += contextualNote + specificMethodology.intro;
-    }
-  }
-  
-  return {
-    text: enhancedResponse,
-    type: 'methodology',
-    service: service || serviceContext.currentService,
-    metadata: {
-      isServiceSpecific: !!service,
-      contextualService: serviceContext.currentService
-    }
-  };
-}
+
 
 /**
  * Enhanced contact response generator that includes address information
@@ -398,7 +342,7 @@ function generateInsightsResponse(serviceContext, language) {
   
   if (insights.insights.includes('Multiple services explored')) {
     const multiServiceResponse = language === 'sw' ? 
-      '🔄 Umeuliza kuhusu huduma nyingi. Je, ungependa mfurushi wa huduma?' :
+      '🔄 Umeuliza kuhusu huduma nyingi. Je, ungependa kifurushi cha huduma mojawapo?' :
       '🔄 You\'ve asked about multiple services. Would you like a service package?';
     
     return {
@@ -429,7 +373,7 @@ function generateFallbackResponse(userMessage, intentAnalysis, chatbotData, lang
   
   let enhancedFallback = baseFallback;
   
-  // Add helpful context based on conversation history
+  // Add helpful context based on conversation history;
   if (serviceContext.serviceHistory.length > 0) {
     const historyNote = language === 'sw' ? 
       `\n\nTumeongea kuhusu: ${serviceContext.serviceHistory.join(', ')}. Je, unahitaji msaada zaidi kwa mojawapo ya hizi?` :
@@ -437,7 +381,7 @@ function generateFallbackResponse(userMessage, intentAnalysis, chatbotData, lang
     enhancedFallback += historyNote;
   }
   
-  // Add common questions suggestions
+  // Add common questions suggestions;
   if (serviceContext.conversationDepth === 0) {
     const suggestionsNote = language === 'sw' ? 
       `\n\n🔍 Unaweza kuuliza:\n• "Huduma gani mnazotoa?"\n• "Bei zenu ni ngapi?"\n• "Mnafanyaje mafunzo?"\n• "Nataka maelezo zaidi"` :

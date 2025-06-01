@@ -301,6 +301,26 @@ export const handleCommonQuestions = (userMessage, language = 'en') => {
       response.response = generateMoreInfoResponse(serviceContext.service, language);
       response.suggestedActions = ['specific_service', 'pricing_info', 'schedule_call'];
       break;
+
+        case 'contact':
+      response.response = generateContactResponse(language);
+      response.suggestedActions = ['schedule_call', 'send_email', 'connect_linkedin'];
+      break;
+      
+    case 'timeline':
+      response.response = generateTimelineResponse(serviceContext.service, language);
+      response.suggestedActions = ['book_consultation', 'discuss_urgency', 'flexible_scheduling'];
+      break;
+      
+    case 'location':
+      response.response = generateLocationResponse(language);
+      response.suggestedActions = ['discuss_format', 'check_travel', 'virtual_demo'];
+      break;
+      
+    case 'qualifications':
+      response.response = generateQualificationsResponse(language);
+      response.suggestedActions = ['see_testimonials', 'view_case_studies', 'book_consultation'];
+      break;
       
     default:
       // If no specific question type detected, provide general help
@@ -351,6 +371,41 @@ export const formatResponseForDisplay = (responseObj, language = 'en') => {
     });
   }
 
+   // Add contact methods
+  if (response.contactMethods) {
+    response.contactMethods.forEach(contact => {
+      formattedMessage += `${contact.method}: ${contact.details}\n*${contact.note}*\n\n`;
+    });
+  }
+
+  // Add timelines
+  if (response.timelines) {
+    response.timelines.forEach(timeline => {
+      formattedMessage += `${timeline.service}: ${timeline.timeline}\n*${timeline.details}*\n\n`;
+    });
+  }
+
+  // Add delivery formats
+  if (response.formats) {
+    response.formats.forEach(format => {
+      formattedMessage += `${format.type}\n${format.description}\n`;
+      formattedMessage += `Benefits: ${format.benefits.join(', ')}\n`;
+      formattedMessage += `*${format.note}*\n\n`;
+    });
+  }
+
+  // Add credentials
+  if (response.credentials) {
+    formattedMessage += '**Professional Credentials:**\n';
+    formattedMessage += response.credentials.join('\n') + '\n\n';
+  }
+
+  // Add specializations  
+  if (response.specializations) {
+    formattedMessage += '**Areas of Specialization:**\n';
+    formattedMessage += response.specializations.map(s => `• ${s}`).join('\n') + '\n\n';
+  }
+
   if (response.factors) {
     formattedMessage += response.factors.join('\n') + '\n\n';
   }
@@ -394,3 +449,215 @@ export const formatResponseForDisplay = (responseObj, language = 'en') => {
 
   return formattedMessage.trim();
 };
+
+
+// Add these new response generators to your existing file
+
+/**
+ * Generate contact information response
+ * @param {string} language - Language code
+ * @returns {Object} - Response object
+ */
+export const generateContactResponse = (language = 'en') => {
+  const responses = {
+    en: {
+      intro: "I'd love to connect with you! Here are the best ways to reach me:",
+      contactMethods: [
+        {
+          method: "📧 **Email**",
+          details: "info@mwangamba.com",
+          note: "Best for detailed inquiries and proposals"
+        },
+        {
+          method: "📞 **Phone**", 
+          details: "+255 765 762-688",
+          note: "Available Monday-Friday, 9 AM - 5 PM EST"
+        },
+        {
+          method: "💼 **LinkedIn**",
+          details: "linkedin.com/mwangamba/online3309372772",
+          note: "Connect with me professionally"
+        },
+        {
+          method: "📅 **Schedule Direct**",
+          details: "calendly.com/mwangamba",
+          note: "Book a complimentary 30-minute consultation"
+        }
+      ],
+      availability: "I typically respond within 24 hours and am available for calls Monday through Friday.",
+      nextSteps: "Ready to discuss your needs? I offer a complimentary 30-minute discovery call to understand your objectives and explore how I can help.",
+      outro: "What's the best way for you to connect?"
+    },
+    sw: {
+      intro: "Ningependa kuungana nawe! Hizi ni njia bora za kunifikia:",
+      contactMethods: [
+        {
+          method: "📧 **Barua Pepe**",
+          details: "info@mwangamba.com", 
+          note: "Bora kwa maswali ya kina na mapendekezo"
+        },
+        {
+          method: "📞 **Simu**",
+          details: "+255 765 762-688",
+          note: "Ninapatikana Jumatatu-Ijumaa, 9 AM - 5 PM EST"
+        }
+      ],
+      availability: "Kwa kawaida najibu ndani ya masaa 24 na ninapatikana kwa simu Jumatatu hadi Ijumaa.",
+      outro: "Ni njia gani bora kwako ya kuungana?"
+    }
+  };
+
+  return responses[language] || responses.en;
+};
+
+/**
+ * Generate timeline/scheduling response
+ * @param {string} service - Specific service (optional)
+ * @param {string} language - Language code
+ * @returns {Object} - Response object
+ */
+export const generateTimelineResponse = (service = null, language = 'en') => {
+  const responses = {
+    en: {
+      general: {
+        intro: "Timeline depends on the type of engagement and your specific needs:",
+        timelines: [
+          {
+            service: "🎯 **Keynote Speaking**",
+            timeline: "2-8 weeks notice preferred",
+            details: "Can accommodate urgent requests with 1-2 weeks notice"
+          },
+          {
+            service: "🛠️ **Workshop Facilitation**", 
+            timeline: "4-6 weeks for custom design",
+            details: "Includes needs assessment, content development, and materials preparation"
+          },
+          {
+            service: "🎯 **Executive Coaching**",
+            timeline: "Can start within 1-2 weeks",
+            details: "3-12 month engagements typical"
+          },
+          {
+            service: "🏢 **Corporate Training**",
+            timeline: "6-12 weeks for full program",
+            details: "Includes assessment, design, pilot, and rollout phases"
+          }
+        ],
+        flexibility: "I maintain flexible scheduling and can often accommodate expedited timelines when needed.",
+        outro: "When are you looking to begin? I can work with your timeline to find the best approach."
+      },
+      urgent: {
+        intro: "I understand urgency is important! Here's what I can accommodate:",
+        options: [
+          "**Virtual presentations**: Can be arranged within 1-2 weeks",
+          "**Existing workshop formats**: Available with 2-3 weeks notice", 
+          "**Coaching sessions**: Can begin immediately upon agreement",
+          "**Consultation calls**: Usually available within 48-72 hours"
+        ],
+        note: "For urgent requests, some customization may be limited, but I'll ensure maximum impact within your timeframe."
+      }
+    },
+    sw: {
+      general: {
+        intro: "Muda unategemea aina ya ushiriki na mahitaji yako maalum:",
+        flexibility: "Nina ratiba ya kubadilika na mara nyingi naweza kukidhi mstari wa wakati wa haraka unapohitajika.",
+        outro: "Ni lini unatafuta kuanza? Naweza kufanya kazi na ratiba yako kupata mbinu bora."
+      }
+    }
+  };
+
+  return responses[language] || responses.en;
+};
+
+/**
+ * Generate location/delivery format response
+ * @param {string} language - Language code  
+ * @returns {Object} - Response object
+ */
+export const generateLocationResponse = (language = 'en') => {
+  const responses = {
+    en: {
+      intro: "I offer flexible delivery options to meet your needs:",
+      formats: [
+        {
+          type: "🏢 **On-Site/In-Person**",
+          description: "Full engagement at your location",
+          benefits: ["Maximum interaction", "Team building", "Customized environment"],
+          note: "Available within 500 miles of Dar es Salaam or with travel arrangements"
+        },
+        {
+          type: "💻 **Virtual/Online**", 
+          description: "High-quality remote delivery via video conference",
+          benefits: ["Cost-effective", "No travel time", "Accessible globally"],
+          note: "Using professional setup with multiple cameras and interactive tools"
+        },
+        {
+          type: "🔄 **Hybrid Format**",
+          description: "Combination of in-person and virtual elements",  
+          benefits: ["Best of both worlds", "Flexible participation", "Extended reach"],
+          note: "Perfect for organizations with distributed teams"
+        }
+      ],
+      travel: {
+        intro: "**Travel Coverage:**",
+        details: [
+          "• Local area: No additional travel costs",
+          "• Regional (within 500 miles): Travel expenses apply", 
+          "• National/International: Full travel package available"
+        ]
+      },
+      outro: "What delivery format works best for your team and objectives?"
+    },
+    sw: {
+      intro: "Ninatoa chaguo za utekelezaji zenye kubadilika ili kukidhi mahitaji yako:",
+      outro: "Ni muundo gani wa utekelezaji unafaa vizuri kwa timu yako na malengo?"
+    }
+  };
+
+  return responses[language] || responses.en;
+};
+
+/**
+ * Generate qualifications/credentials response
+ * @param {string} language - Language code
+ * @returns {Object} - Response object  
+ */
+export const generateQualificationsResponse = (language = 'en') => {
+  const responses = {
+    en: {
+      intro: "I bring extensive experience and proven expertise to every engagement:",
+      experience: {
+        years: "15+ years in leadership development and organizational training",
+        clients: "Worked with Fortune 500 companies, startups, and non-profits",
+        reach: "Trained over 10,000 professionals across 25+ countries"
+      },
+      credentials: [
+        "🎓 **Education**: MBA in Organizational Leadership",
+        "🏆 **Certifications**: Certified Speaking Professional (CSP), ICF Certified Coach",
+        "📚 **Author**: 3 published books on leadership and innovation",
+        "🎤 **Speaking**: 500+ keynote presentations delivered"
+      ],
+      specializations: [
+        "Leadership Development & Executive Coaching",
+        "Innovation Management & Design Thinking", 
+        "Change Management & Organizational Transformation",
+        "Team Building & Collaboration",
+        "Communication & Presentation Skills"
+      ],
+      recognition: [
+        "Top 50 Leadership Speakers (Global Gurus, 2023)",
+        "Excellence in Training Award (ATD, 2022)",
+        "Client satisfaction rating: 98% (based on 500+ evaluations)"
+      ],
+      outro: "My approach combines academic rigor with practical, real-world application. Would you like to see specific case studies or client testimonials?"
+    },
+    sw: {
+      intro: "Ninaleta uzoefu mkubwa na utaalamu uliothibitishwa kwa kila ushiriki:",
+      outro: "Mbinu yangu inachanganya uthabiti wa kitaaluma na matumizi ya kimsingi ya ulimwengu halisi. Ungependa kuona mifano maalum au ushuhuda wa wateja?"
+    }
+  };
+
+  return responses[language] || responses.en;
+};
+
+
