@@ -68,7 +68,7 @@ export const EventCard = ({ event, onRegister }) => {
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
-                <span className="text-lg font-bold">${event.price}</span>
+                <span className="text-lg font-bold">TZS {event.price}</span>
               </motion.div>
 
               {/* Status Badge */}

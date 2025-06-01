@@ -197,7 +197,7 @@ export const PurchaseForm = React.memo(({ formData, onChange, event }) => {
           <div className="relative flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-success-500 to-success-600 shadow-lg hover:scale-110 hover:rotate-3 transition-transform duration-200">
-                <DollarSign className="w-6 h-6 text-white" />
+                <b className="w-6 h-6 text-white" >TZS </b>
               </div>
               <div>
                 <h4 className="text-lg font-semibold text-neutral-800">
@@ -211,10 +211,10 @@ export const PurchaseForm = React.memo(({ formData, onChange, event }) => {
             
             <div className="text-right hover:scale-105 transition-transform duration-200">
               <div className="text-3xl font-bold bg-gradient-to-r from-success-600 to-success-500 bg-clip-text text-transparent">
-                ${totalPrice}
+                TZS {totalPrice}
               </div>
               <div className="text-sm text-neutral-500">
-                ${event.price} {language === 'en' ? 'per ticket' : 'kwa tiketi'}
+                TZS {event.price} {language === 'en' ? 'per ticket' : 'kwa tiketi'}
               </div>
             </div>
           </div>
