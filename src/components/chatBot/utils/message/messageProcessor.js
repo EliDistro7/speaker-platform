@@ -215,7 +215,7 @@ export function generateContactResponse(chatbotData, serviceContext, language) {
   }
   
   // Add conversation depth context
-  if (serviceContext.conversationDepth >= 5) {
+  if (serviceContext.conversationDepth >= 10) {
     const historyNote = language === 'sw' ?
       '\n\n📞 Kwa kuwa tumekuwa na mazungumzo ya kina, mtaalamu wetu atakusaidia zaidi.' :
       '\n\n📞 Since we\'ve had an in-depth conversation, our specialist can help you further.';
