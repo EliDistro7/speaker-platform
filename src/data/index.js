@@ -35,7 +35,7 @@ export const events = [
     time: "14:00",
     duration: "2 hours",
     location: "Convention Center, Downtown",
-    price: 149,
+    price: 20000,
     capacity: 200,
     registered: 127,
     image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=250&fit=crop"
@@ -48,7 +48,7 @@ export const events = [
     time: "09:00",
     duration: "4 hours",
     location: "Dar es Salaam Business Hub",
-    price: 75,
+    price: 150000,
     capacity: 150,
     registered: 89,
     image: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=400&h=250&fit=crop"
@@ -61,7 +61,7 @@ export const events = [
     time: "08:30",
     duration: "6 hours",
     location: "Arusha Agricultural Training Center",
-    price: 45,
+    price: 10000,
     capacity: 300,
     registered: 234,
     image: "https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=400&h=250&fit=crop"
@@ -74,7 +74,7 @@ export const events = [
     time: "10:00",
     duration: "3 hours",
     location: "Stone Town Cultural Center, Zanzibar",
-    price: 60,
+    price: 20000,
     capacity: 120,
     registered: 67,
     image: "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=400&h=250&fit=crop"
