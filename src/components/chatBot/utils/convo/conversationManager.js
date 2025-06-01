@@ -1,9 +1,12 @@
 // File: app/components/layout/ChatBot/utils/conversationManager.js
 
-import { createFreshServiceContext, validateServiceContext } from '@/utils/serviceContextUtils';
+import { createFreshServiceContext, validateServiceContext } from '@/utils/context/serviceContextUtils';
+
+// In-memory storage for conversation state
+let conversationMemoryStore = null;
 
 /**
- * Save conversation state to session storage
+ * Save conversation state to memory
  * @param {Array} messages - Chat messages
  * @param {Object} serviceContext - Service context
  * @param {string} activeService - Currently active service
@@ -25,10 +28,11 @@ export function saveConversationState(messages, serviceContext, activeService, l
       version: '1.0' // For future compatibility
     };
     
-    sessionStorage.setItem('chatbot_last_conversation', JSON.stringify(conversationState));
+    // Store in memory instead of sessionStorage
+    conversationMemoryStore = conversationState;
     
     if (process.env.NODE_ENV === 'development') {
-      console.log('Conversation saved successfully');
+      console.log('Conversation saved successfully to memory');
     }
     
     return true;
@@ -39,18 +43,17 @@ export function saveConversationState(messages, serviceContext, activeService, l
 }
 
 /**
- * Restore conversation state from session storage
+ * Restore conversation state from memory
  * @param {string} language - Current language
  * @returns {Object|null} Restored conversation state or null
  */
 export function restoreConversationState(language) {
   try {
-    const savedConversation = sessionStorage.getItem('chatbot_last_conversation');
-    if (!savedConversation) {
+    if (!conversationMemoryStore) {
       return null;
     }
     
-    const conversationState = JSON.parse(savedConversation);
+    const conversationState = conversationMemoryStore;
     
     // Validate the restored data
     if (!conversationState.messages || !Array.isArray(conversationState.messages)) {
@@ -79,7 +82,7 @@ export function restoreConversationState(language) {
     }
     
     if (process.env.NODE_ENV === 'development') {
-      console.log('Conversation restored successfully');
+      console.log('Conversation restored successfully from memory');
     }
     
     return conversationState;
@@ -94,9 +97,9 @@ export function restoreConversationState(language) {
  */
 export function clearConversationState() {
   try {
-    sessionStorage.removeItem('chatbot_last_conversation');
+    conversationMemoryStore = null;
     if (process.env.NODE_ENV === 'development') {
-      console.log('Conversation state cleared');
+      console.log('Conversation state cleared from memory');
     }
   } catch (error) {
     console.warn('Failed to clear conversation state:', error);

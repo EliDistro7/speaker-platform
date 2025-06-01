@@ -106,7 +106,7 @@ export function generateCasualResponse(interactionAnalysis, serviceContext, lang
 
     case 'confusion':
       responseText = language === 'sw' ? 
-        '🤔 Samahani kwa uwazi huo. Nitajaribu kueleza vizuri zaidi. Ni sehemu gani hasa unayohitaji kufafanuliwa?' :
+        '🤔 Samahani kwa kukuchanganya. Nitajaribu kueleza vizuri zaidi. Ni sehemu gani hasa unayohitaji kufafanuliwa?' :
         '🤔 Sorry for the confusion. Let me try to explain better. Which part specifically would you like me to clarify?';
       
       // Offer to restart or simplify

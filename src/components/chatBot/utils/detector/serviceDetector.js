@@ -3,7 +3,7 @@
 import {serviceKeywords} from '@/data/chat/serviceKeywords';
 import { serviceDescriptions } from '@/data/chat/serviceDescriptions';
 
-import { detectServiceFromMessage, updateServiceContext } from '@/utils/serviceContextUtils';
+import { detectServiceFromMessage, updateServiceContext } from '@/utils/context/serviceContextUtils';
 import { findMatchingService } from '@/utils/ChatBotUtils';
 
 /**

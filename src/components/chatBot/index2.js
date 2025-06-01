@@ -18,7 +18,7 @@ import {
   getConversationInsights,
   createFreshServiceContext,
   validateServiceContext
-} from '@/utils/serviceContextUtils';
+} from '@/utils/context/serviceContextUtils';
 
 // Import existing utility functions from chatBotUtils
 import {
@@ -37,14 +37,14 @@ import {
   generateContextualResponse,
   analyzeMessageIntent,
   validateResponse
-} from './utils/responseGenerator';
+} from './utils/response/responseGenerator';
 
 // **NEW IMPORT: Enhanced service detector with confidence scoring**
 import {
   detectServiceWithConfidence,
   validateServiceDetection,
   getDetectionSummary
-} from './utils/serviceDetector';
+} from './utils/detector/serviceDetector';
 
 
 // 1. ADD NEW IMPORT at the top of your ChatBot component
@@ -53,7 +53,7 @@ import {
   generateContextualSuggestions,
   generateFollowUpSuggestions,
   generateIndustrySuggestions
-} from './utils/suggestionEngine';
+} from './utils/suggestion/suggestionEngine';
 
 
 // 1. ADD NEW IMPORTS (add to existing imports section)
@@ -67,7 +67,7 @@ import {
   detectConversationPatterns,
   pruneConversation,
   exportConversation
-} from './utils/conversationManager';
+} from './utils/convo/conversationManager';
 
 
 

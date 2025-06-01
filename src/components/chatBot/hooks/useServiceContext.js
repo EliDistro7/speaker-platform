@@ -4,7 +4,7 @@ import {
   validateServiceContext, 
   createFreshServiceContext,
   getConversationInsights 
-} from '@/utils/serviceContextUtils';
+} from '@/utils/context/serviceContextUtils';
 
 /**
  * Custom hook to manage service context

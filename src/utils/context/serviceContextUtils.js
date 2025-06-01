@@ -1,181 +1,95 @@
 // File: utils/serviceContextUtils.js
 
 import { pricingData } from '@/data/chat/pricingData';
+import { serviceKeywords } from '@/data/chat/serviceKeywords';
+import { serviceDescriptions } from '@/data/chat/serviceDescriptions';
+import {serviceDetectionPatterns } from './patterns'
+import { stopWords } from './stopwords';
+import { preprocessMessage } from './helpers';
+import { calculateKeywordScore } from './helpers';
+import {detectServiceFromMessage} from './detect-service/index';
+
+export {detectServiceFromMessage};
+
+
+
+
 
 /**
- * Enhanced service context management utilities
- */
-
-// Service detection keywords and patterns
-export const serviceDetectionPatterns = {
-  'Keynote Speaking': {
-    en: {
-      keywords: ['keynote', 'speaking', 'presentation', 'speech', 'conference', 'event', 'corporate event', 'local event', 'international event', 'speaker'],
-      patterns: [
-        /keynote\s+(speaking|presentation|speech)/i,
-        /(corporate|business|conference)\s+event/i,
-        /speaking\s+engagement/i,
-        /motivational\s+speaker/i
-      ]
-    },
-    sw: {
-      keywords: ['hotuba', 'mazungumzo', 'uwasilishaji', 'mkutano', 'tukio', 'mkutano wa kampuni', 'tukio la ndani', 'tukio la kimataifa', 'msemaji'],
-      patterns: [
-        /hotuba\s+(kuu|mkuu)/i,
-        /mazungumzo\s+(ya\s+)?kampuni/i,
-        /msemaji\s+mkuu/i,
-        /uwasilishaji\s+wa\s+tukio/i
-      ]
-    }
-  },
-  'Workshop Facilitation': {
-    en: {
-      keywords: ['workshop', 'facilitation', 'training', 'team building', 'half-day', 'full-day', 'multi-day', 'facilitate', 'interactive'],
-      patterns: [
-        /workshop\s+(facilitation|training)/i,
-        /(team\s+building|leadership)\s+workshop/i,
-        /(half|full)\s+day\s+workshop/i,
-        /interactive\s+session/i
-      ]
-    },
-    sw: {
-      keywords: ['warsha', 'uongozaji', 'mafunzo', 'kujenga timu', 'nusu siku', 'siku nzima', 'siku nyingi', 'uongozi', 'kushirikishana'],
-      patterns: [
-        /warsha\s+(ya\s+)?(mafunzo|uongozi)/i,
-        /kujenga\s+timu/i,
-        /(nusu|siku\s+nzima)\s+warsha/i,
-        /mafunzo\s+ya\s+kushirikishana/i
-      ]
-    }
-  },
-  'Executive Coaching': {
-    en: {
-      keywords: ['coaching', 'executive', 'leadership', 'personal development', 'one-on-one', 'c-suite', 'ceo', 'mentor', 'guide'],
-      patterns: [
-        /executive\s+coaching/i,
-        /leadership\s+(coaching|development)/i,
-        /personal\s+development/i,
-        /(one-on-one|1-on-1)\s+coaching/i,
-        /c-suite\s+coaching/i
-      ]
-    },
-    sw: {
-      keywords: ['mafunzo', 'mkurugenzi', 'uongozi', 'maendeleo ya kibinafsi', 'mtu mmoja', 'mkurugenzi mkuu', 'mshauri', 'mwongozi'],
-      patterns: [
-        /mafunzo\s+ya\s+(mkurugenzi|uongozi)/i,
-        /maendeleo\s+ya\s+kibinafsi/i,
-        /mshauri\s+wa\s+uongozi/i,
-        /mafunzo\s+ya\s+mtu\s+mmoja/i
-      ]
-    }
-  },
-  'Corporate Training': {
-    en: {
-      keywords: ['corporate training', 'team training', 'department training', 'organization', 'company training', 'staff development', 'employee training'],
-      patterns: [
-        /corporate\s+training/i,
-        /(team|department|staff)\s+training/i,
-        /employee\s+development/i,
-        /organization(al)?\s+training/i,
-        /company\s+wide\s+training/i
-      ]
-    },
-    sw: {
-      keywords: ['mafunzo ya makampuni', 'mafunzo ya timu', 'mafunzo ya idara', 'shirika', 'mafunzo ya kampuni', 'maendeleo ya wafanyakazi'],
-      patterns: [
-        /mafunzo\s+ya\s+(makampuni|kampuni)/i,
-        /mafunzo\s+ya\s+(timu|idara)/i,
-        /maendeleo\s+ya\s+wafanyakazi/i,
-        /mafunzo\s+ya\s+shirika/i
-      ]
-    }
-  },
-  'Virtual Speaking': {
-    en: {
-      keywords: ['virtual', 'online', 'remote', 'zoom', 'teams', 'webinar', 'digital', 'virtual keynote', 'online presentation'],
-      patterns: [
-        /virtual\s+(speaking|presentation|keynote)/i,
-        /online\s+(event|presentation|workshop)/i,
-        /remote\s+(speaking|training)/i,
-        /(zoom|teams|webinar)\s+(presentation|meeting)/i
-      ]
-    },
-    sw: {
-      keywords: ['mtandaoni', 'mbali', 'kidijitali', 'warsha ya mtandaoni', 'uwasilishaji mtandaoni', 'mazungumzo ya mbali'],
-      patterns: [
-        /(uwasilishaji|mazungumzo)\s+mtandaoni/i,
-        /warsha\s+ya\s+mtandaoni/i,
-        /mafunzo\s+ya\s+mbali/i,
-        /mkutano\s+wa\s+mtandaoni/i
-      ]
-    }
-  }
-};
-
-/**
- * Detect service from user message using enhanced pattern matching
+ * Get multiple service suggestions with confidence scores
  * @param {string} userMessage - The user's message
  * @param {string} language - Current language (en/sw)
- * @returns {Object} - Detection result with service, confidence, and matched terms
+ * @param {number} maxResults - Maximum number of results to return
+ * @returns {Array} - Array of detection results
  */
-export const detectServiceFromMessage = (userMessage, language = 'en') => {
+export const getMultipleServiceSuggestions = (userMessage, language = 'en', maxResults = 3) => {
   if (!userMessage || typeof userMessage !== 'string') {
-    return { service: null, confidence: 0, matchedTerms: [], patterns: [] };
+    return [];
   }
 
-  const messageLower = userMessage.toLowerCase().trim();
+  const processedMessage = preprocessMessage(userMessage, language);
   const detectedServices = [];
 
-  // Check each service for keyword and pattern matches
   Object.entries(serviceDetectionPatterns).forEach(([serviceName, serviceData]) => {
     const langData = serviceData[language] || serviceData.en;
-    const { keywords, patterns } = langData;
+    const { keywords, patterns, negativePatterns = [] } = langData;
 
-    let keywordMatches = 0;
+    const hasNegativeMatch = negativePatterns.some(pattern => 
+      pattern.test(userMessage) || pattern.test(processedMessage)
+    );
+    
+    if (hasNegativeMatch) return;
+
+    const keywordAnalysis = calculateKeywordScore(processedMessage, keywords, language);
+    
     let patternMatches = 0;
-    const matchedKeywords = [];
-    const matchedPatterns = [];
-
-    // Check keyword matches
-    keywords.forEach(keyword => {
-      if (messageLower.includes(keyword.toLowerCase())) {
-        keywordMatches++;
-        matchedKeywords.push(keyword);
-      }
-    });
-
-    // Check pattern matches
     patterns.forEach(pattern => {
-      if (pattern.test(messageLower)) {
+      if (pattern.test(userMessage) || pattern.test(processedMessage)) {
         patternMatches++;
-        matchedPatterns.push(pattern.source);
       }
     });
 
-    // Calculate confidence score (patterns weighted higher than keywords)
-    const confidence = (keywordMatches * 1) + (patternMatches * 2);
+    const confidence = keywordAnalysis.relevanceScore + (patternMatches * 5);
 
     if (confidence > 0) {
       detectedServices.push({
         service: serviceName,
-        confidence,
-        matchedTerms: matchedKeywords,
-        patterns: matchedPatterns,
-        keywordCount: keywordMatches,
-        patternCount: patternMatches
+        confidence: Math.round(confidence * 100) / 100,
+        matchedTerms: keywordAnalysis.matchedKeywords,
+        details: {
+          keywordMatches: keywordAnalysis.totalMatches,
+          patternMatches,
+          method: patternMatches > 0 ? 'pattern+keyword' : 'keyword-only'
+        }
       });
     }
   });
 
-  // Sort by confidence score (highest first)
-  detectedServices.sort((a, b) => b.confidence - a.confidence);
+  return detectedServices
+    .sort((a, b) => b.confidence - a.confidence)
+    .slice(0, maxResults);
+};
 
-  return detectedServices.length > 0 ? detectedServices[0] : {
-    service: null,
-    confidence: 0,
-    matchedTerms: [],
-    patterns: []
-  };
+/**
+ * Validate service detection result
+ * @param {Object} detectionResult - Result from detectServiceFromMessage
+ * @returns {boolean} - Whether the detection is reliable
+ */
+export const isDetectionReliable = (detectionResult) => {
+  if (!detectionResult || !detectionResult.service) {
+    return false;
+  }
+  
+  const { confidence, details } = detectionResult;
+  
+  // Consider reliable if:
+  // - High confidence score (> 5)
+  // - Has pattern matches
+  // - Has multiple keyword matches or exact matches
+  return confidence > 5 || 
+         details.patternMatches > 0 || 
+         details.exactMatches > 0 ||
+         details.keywordMatches > 2;
 };
 
 /**

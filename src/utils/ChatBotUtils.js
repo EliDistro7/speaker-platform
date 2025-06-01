@@ -484,13 +484,13 @@ export const isPricingQuery = (message, language) => {
   
   const pricingKeywords = {
     en: [
-      'price', 'pricing', 'cost', 'fee', 'charge', 'rate', 'budget',
+      'price','prices', 'pricing', 'cost', 'fee', 'charge', 'rate', 'budget',
       'how much', 'what does it cost', 'pricing for', 'cost of',
       'rates for', 'fees for', 'charges for', 'price list',
       'what are the prices', 'how much does', 'what is the cost'
     ],
     sw: [
-      'bei', 'gharama', 'kiasi', 'malipo', 'ada', 'kiwango',
+      'bei', 'gharama', 'kiasi', 'malipo', 'ada', 'kiwango','sh ngapi','ngapi',
       'ni kiasi gani', 'gharama ya', 'bei ya', 'malipo ya',
       'ni bei gani', 'inagharimu', 'unatozwa'
     ]

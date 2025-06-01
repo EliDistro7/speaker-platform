@@ -16,7 +16,7 @@ import {
   isPricingInquiry,
   generatePricingResponse,
   getConversationInsights
-} from '@/utils/serviceContextUtils';
+} from '@/utils/context/serviceContextUtils';
 
 /**
  * Process incoming user message and generate appropriate response

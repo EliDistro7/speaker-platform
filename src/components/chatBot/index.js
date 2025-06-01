@@ -18,7 +18,7 @@ import {
   getConversationInsights,
   createFreshServiceContext,
   validateServiceContext
-} from '@/utils/serviceContextUtils';
+} from '@/utils/context/serviceContextUtils';
 
 // Import existing utility functions from chatBotUtils
 import {
@@ -37,7 +37,7 @@ import {
   generateContextualResponse,
   analyzeMessageIntent,
   validateResponse
-} from './utils/responseGenerator';
+} from './utils/response/responseGenerator';
 
 // Component imports
 import ChatHeader from './ChatHeader';
